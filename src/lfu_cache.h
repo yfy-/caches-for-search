@@ -5,8 +5,7 @@
 #ifndef CENG778_PROJECT_LFU_CACHE_H
 #define CENG778_PROJECT_LFU_CACHE_H
 
-#include "types.h"
-#include "frequency_histogram.h"
+#include "frequency-histogram/frequency_histogram.h"
 #include <string>
 #include <unordered_map>
 
@@ -20,22 +19,22 @@ private:
         Node(std::string d) : data{d} {}
     };
 
-    Uint32 size_;
-    Uint32 count_;
+    std::uint64_t size_;
+    std::uint64_t count_;
 
     Node* head_;
     std::unordered_map<std::string, Node*> cache_;
     FrequencyHistogram* freq_hist_;
 
-    void FindPlace(Node*, Uint32);
+    void FindPlace(Node*, std::uint64_t);
 
 public:
-    inline Uint32 Size() const { return size_; }
-    inline Uint32 Count() const { return count_; }
-    bool IsExist(std::string);
+    inline std::uint64_t Size() const { return size_; }
+    inline std::uint64_t Count() const { return count_; }
+    bool IsExist(const std::string&);
     std::string ToString();
 
-    LfuCache(Uint32, FrequencyHistogram*);
+    LfuCache(std::uint64_t , FrequencyHistogram*);
 
     virtual ~LfuCache();
 };

@@ -4,7 +4,7 @@
 
 #include "pure_lfu_histogram.h"
 
-Uint32 PureLfuHistogram::Add(std::string query) {
+std::uint64_t PureLfuHistogram::Add(const std::string &query) {
     if (histogram.find(query) != histogram.end()) {
         histogram[query]++;
     } else {
@@ -14,6 +14,6 @@ Uint32 PureLfuHistogram::Add(std::string query) {
     return histogram[query];
 }
 
-Uint32 PureLfuHistogram::Estimate(std::string query) {
+std::uint64_t PureLfuHistogram::Estimate(const std::string &query) {
     return histogram[query];
 }

@@ -27,13 +27,13 @@ namespace utl {
         return v;
     }
 
-    Uint32 unique_size(std::vector<std::string> vector) {
+    std::uint64_t unique_size(const std::vector<std::string> &vector) {
         std::unordered_map<std::string, int> map;
 
         for (auto v: vector) {
             map[v] = 0;
         }
 
-        return (Uint32) map.size();
+        return (std::uint64_t) map.size();
     }
 }

@@ -7,12 +7,11 @@
 
 #include <string>
 #include <vector>
-#include "types.h"
 
 namespace utl {
     std::vector<std::string> split(std::string, char);
 
-    Uint32 unique_size(std::vector<std::string>);
+    std::uint64_t unique_size(const std::vector<std::string> &);
 }
 
 #endif //CENG778_PROJECT_UTIL_H

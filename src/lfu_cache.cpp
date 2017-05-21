@@ -4,7 +4,7 @@
 
 #include "lfu_cache.h"
 
-LfuCache::LfuCache(Uint32 s, FrequencyHistogram* fh) {
+LfuCache::LfuCache(std::uint64_t s, FrequencyHistogram* fh) {
     size_ = s;
     count_ = 0;
     head_ = new Node("");
@@ -21,10 +21,10 @@ LfuCache::~LfuCache() {
     }
 }
 
-bool LfuCache::IsExist(std::string query) {
+bool LfuCache::IsExist(const std::string &query) {
     bool result = false;
 
-    Uint32 new_freq = freq_hist_->Add(query);
+    std::uint64_t new_freq = freq_hist_->Add(query);
     Node* current = cache_[query];
 
     if (current != nullptr)
@@ -61,7 +61,7 @@ bool LfuCache::IsExist(std::string query) {
     return result;
 }
 
-void LfuCache::FindPlace(LfuCache::Node *node, Uint32 freq) {
+void LfuCache::FindPlace(LfuCache::Node *node, std::uint64_t freq) {
     while (node->next != nullptr && freq >= freq_hist_->Estimate(node->next->data)) {
         Node* next = node->next;
 
