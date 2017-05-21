@@ -11,16 +11,16 @@
 class WLfuHistogram : public FrequencyHistogram {
 
 private:
-    std::unordered_map<std::string, Uint32> histogram;
-    Uint32 max_window_size;
-    Uint32 cur_window_size;
+    std::unordered_map<std::string, std::uint64_t> histogram;
+    std::uint64_t max_window_size;
+    std::uint64_t cur_window_size;
 
 public:
-    WLfuHistogram(Uint32 m, Uint32 c=0) : max_window_size(m), cur_window_size(c) {}
+    WLfuHistogram(std::uint64_t m, std::uint64_t c=0) : max_window_size(m), cur_window_size(c) {}
 
-    Uint32 Add(std::string) override;
+    std::uint64_t Add(const std::string&) override;
 
-    Uint32 Estimate(std::string) override;
+    std::uint64_t Estimate(const std::string&) const override;
 };
 
 

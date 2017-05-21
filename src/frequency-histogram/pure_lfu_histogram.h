@@ -17,7 +17,7 @@ private:
 public:
     std::uint64_t Add(const std::string &) override;
 
-    std::uint64_t Estimate(const std::string &) override;
+    std::uint64_t Estimate(const std::string &) const override;
 };
 
 
