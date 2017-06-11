@@ -14,6 +14,6 @@ std::uint64_t PureLfuHistogram::Add(const std::string &query) {
     return histogram[query];
 }
 
-std::uint64_t PureLfuHistogram::Estimate(const std::string &query) const{
+std::uint64_t PureLfuHistogram::Estimate(const std::string &query) const {
     return histogram.at(query);
 }

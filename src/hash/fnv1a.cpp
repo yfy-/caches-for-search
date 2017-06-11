@@ -5,8 +5,8 @@
 #include "fnv1a.h"
 
 // FNV constants for 64 bit range
-const std::uint64_t kFnvPrime = 1099511628211;
-const std::uint64_t kOffsetBasis = 14695981039346656037;
+const std::uint64_t kFnvPrime = 1099511628211U;
+const std::uint64_t kOffsetBasis = 14695981039346656037U;
 
 
 std::uint64_t Fnv1a(const std::string &kKey) {

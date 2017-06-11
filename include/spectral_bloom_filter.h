@@ -21,7 +21,7 @@ private:
 
         for (int i = 0; i < bit_width_; ++i) {
             if (counters_[index + i] == 1) {
-                val += pow(2, bit_width_ - i - 1);
+                val += pow(2, i);
             }
         }
 
@@ -30,35 +30,24 @@ private:
 
     void Add(std::uint64_t index) {
 
-        std::uint64_t current = index + bit_width_;
-
-        while (current > index) {
-            counters_.flip(current - 1);
-
-            if (counters_[current - 1] == 1)
+        for (int i = 0; i < bit_width_; ++i) {
+            counters_.flip(index + i);
+            if (counters_[index + i] == 1){
                 return;
-            current--;
+            }
         }
 
-        if (current == index)
-            std::cout << "Overflow detected!" << std::endl;
+        for (int i = 0; i < bit_width_; ++i) {
+            counters_.flip(index + i);
+        }
     }
 
     void RightShift(std::uint64_t index) {
-
-        std::uint64_t counter = 0;
-
-        int spare = counters_[index];
-        while (counter < bit_width_ - 1) {
-            int temp = counters_[index + counter + 1];
-
-            counters_[index + counter + 1] = spare;
-
-            spare = temp;
-            counter++;
+        for (int i = 0; i < bit_width_ - 1; ++i) {
+            counters_[index + i] = counters_[index + i + 1];
         }
 
-        counters_[index] = 0;
+        counters_[index + bit_width_ - 1] = 0;
     }
 
 
@@ -104,11 +93,8 @@ public:
     }
 
     void Reset() {
-        std::uint64_t current = 0;
-
-        while (current < window_size_) {
-            RightShift(current * bit_width_);
-            current++;
+        for (int i = 0; i < window_size_; ++i) {
+            RightShift(i * bit_width_);
         }
     }
 

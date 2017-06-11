@@ -5,7 +5,7 @@
 #ifndef CENG778_PROJECT_LFU_CACHE_H
 #define CENG778_PROJECT_LFU_CACHE_H
 
-#include "frequency-histogram/frequency_histogram.h"
+#include "frequency_histogram.h"
 #include <string>
 #include <unordered_map>
 
@@ -16,7 +16,7 @@ private:
     struct Node {
         std::string data;
         Node* next;
-        Node(std::string d) : data{d} {}
+        Node(std::string d) : data{d}, next{nullptr} {}
     };
 
     std::uint64_t size_;

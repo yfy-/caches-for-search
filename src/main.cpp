@@ -1,78 +1,77 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "frequency-histogram/frequency_histogram.h"
-#include "frequency-histogram/pure_lfu_histogram.h"
+#include <tiny_lfu_histogram.h>
+#include <algorithm>
+#include "pure_lfu_histogram.h"
 #include "lfu_cache.h"
-#include "util.h"
-#include "hash/murmur3.h"
-#include "hash/fnv1a.h"
-#include "frequency-histogram/spectral_bloom_filter.h"
 
+double MissRatio(const std::vector<std::string> &queries, LfuCache* cache, std::uint64_t warmUp) {
+    std::uint64_t hit = 0;
+    std::uint64_t miss = 0;
+
+
+    for (auto q: queries) {
+        bool is_hit = cache->IsExist(q);
+        if (warmUp > 0) {
+            warmUp--;
+            continue;
+        }
+
+        if (is_hit)
+            hit++;
+        else
+            miss++;
+
+    }
+
+    return hit / ( (double) hit + miss);
+}
 
 int main(void) {
+    std::vector<std::string> queries;
+    std::ifstream q_file ("../resource/aol_200K_fixed.txt");
 
-//    std::vector<std::string> queries;
-//    std::ifstream q_file ("query_log.txt");
+    if (q_file.is_open()) {
+        std::string line = "";
+        while (getline(q_file, line)) {
+            queries.push_back(line);
+        }
+    }
+    q_file.close();
+
+//    std::cout << queries.size() << std::endl;
+//    std::cout << utl::unique_size(queries) << std::endl;
+
+    /*
+     * Must know query size and unique query size at compile time.
+     * Because std::bitset requires to
+     */
+    constexpr std::uint64_t query_size = 200000;
+    constexpr std::uint64_t unique_size = 135009;
+    constexpr std::uint64_t cache_size = unique_size / 8;
+    constexpr std::uint64_t window_size = query_size / 2;
+    constexpr std::uint64_t wc_ratio = (std::uint64_t) ceil(window_size / (double) cache_size);
+    constexpr std::uint64_t bit_width = sizeof(wc_ratio) * 8 - __builtin_clzl(wc_ratio - 1);
+    constexpr std::uint64_t warm_up = window_size;
+
+    std::cout << "Bit width = " << bit_width << std::endl;
+    FrequencyHistogram* t_histogram = new TinyLfuHistogram<window_size, bit_width>();
+    LfuCache* cache = new LfuCache(cache_size, t_histogram);
+    std::cout << "Tiny LFU = " << MissRatio(queries, cache, warm_up) << std::endl;
+    std::cout << "Tiny LFU Memory = " << sizeof(*t_histogram) << std::endl;
+
+    delete t_histogram;
+    delete cache;
+
+//    FrequencyHistogram* p_histogram = new PureLfuHistogram();
 //
-//    if (q_file.is_open()) {
-//        std::string line = "";
-//        while (getline(q_file, line)) {
-//            std::vector<std::string> tokens = utl::split(line, ':');
-//            queries.push_back(tokens[1]);
-//        }
-//    }
-//    q_file.close();
+//    cache = new LfuCache(cache_size, p_histogram);
 //
-//    std::cout << "Query Size " << queries.size() << std::endl;
-//    std::uint64_t unique_size = utl::unique_size(queries);
-//    std::cout << "Unique Size " << unique_size << std::endl;
+//    std::cout << "Pure LFU = " << MissRatio(queries, cache, warm_up) << std::endl;
+//    std::cout << "Pure LFU Memory = " << sizeof(*p_histogram) << std::endl;
 //
-//    FrequencyHistogram* pure = new PureLfuHistogram();
-//
-//    // Cache size is 10% of unique query size
-//    LfuCache* cache = new LfuCache(unique_size / 10, pure);
-//
-//    // Warm up is done by first 20% of query size
-//    std::uint64_t warm_up = (std::uint64_t) (queries.size() / 20);
-//
-//    std::uint64_t hit = 0;
-//    std::uint64_t miss = 0;
-//    for (auto q: queries) {
-//        bool is_hit = cache->IsExist(q);
-//        if (warm_up > 0) {
-//            warm_up--;
-//            continue;
-//        }
-//
-//        if (is_hit)
-//            hit++;
-//        else
-//            miss++;
-//    }
-//
-//    std::cout << "Hit " << hit << "Miss" << miss << std::endl;
-//    delete pure;
+//    delete p_histogram;
 //    delete cache;
-
-//    SpectralBloomFilter sbf<5,5>;
-//
-//    std::cout << sizeof(sbf) << std::endl;
-//
-//    sbf.Add(std::vector<std::uint64_t> {0});
-//    sbf.Add(std::vector<std::uint64_t> {0});
-//    sbf.Add(std::vector<std::uint64_t> {0});
-//    sbf.Add(std::vector<std::uint64_t> {0});
-//    sbf.Add(std::vector<std::uint64_t> {0});
-//
-//    std::cout << sbf.ToString()<< std::endl;
-//
-//    sbf.Reset();
-//
-//    std::cout << sbf.ToString()<< std::endl;
-//    std::cout << sbf.Estimate(std::vector<std::uint64_t> {0, 1, 2});
-
-    std::cout << 5 / (double) 2 - 1;
-
     return 0;
 }
