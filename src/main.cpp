@@ -49,11 +49,11 @@ int main(void) {
      */
     constexpr std::uint64_t query_size = 200000;
     constexpr std::uint64_t unique_size = 135009;
-    constexpr std::uint64_t cache_size = unique_size / 8;
-    constexpr std::uint64_t window_size = query_size / 2;
+    constexpr std::uint64_t cache_size = unique_size / 64;
+    constexpr std::uint64_t window_size = query_size / 8;
     constexpr std::uint64_t wc_ratio = (std::uint64_t) ceil(window_size / (double) cache_size);
     constexpr std::uint64_t bit_width = sizeof(wc_ratio) * 8 - __builtin_clzl(wc_ratio - 1);
-    constexpr std::uint64_t warm_up = window_size;
+    constexpr std::uint64_t warm_up = 4 * window_size;
 
     std::cout << "Bit width = " << bit_width << std::endl;
     FrequencyHistogram* t_histogram = new TinyLfuHistogram<window_size, bit_width>();

@@ -9,6 +9,8 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include "murmur3.h"
+#include "fnv1a.h"
 
 template <std::uint64_t window_size_, std::uint64_t bit_width_> class SpectralBloomFilter {
 
@@ -50,11 +52,23 @@ private:
         counters_[index + bit_width_ - 1] = 0;
     }
 
+    std::vector<std::uint64_t> Hash(const std::string &kKey) const {
+        std::uint64_t fnv = Fnv1a(kKey);
+        std::uint64_t m_hash[2];
+
+        MurmurHash3_x64_128(kKey.c_str(), (uint32_t) kKey.length(), 42, m_hash);
+
+        std::uint64_t combined = fnv + m_hash[1];
+
+        return std::vector<std::uint64_t> {fnv % window_size_, m_hash[1] % window_size_,
+                                           combined % window_size_};
+    }
 
 public:
 
-    std::uint64_t Add(const std::vector<std::uint64_t> &indices) {
+    std::uint64_t Add(const std::string& kQuery) {
 
+        std::vector<std::uint64_t> indices { Hash(kQuery) };
         std::uint64_t min = Read(indices[0] * bit_width_);
         std::vector<std::uint64_t> to_be_added {indices[0]};
 
@@ -64,10 +78,8 @@ public:
             if (current < min) {
                 min = current;
                 to_be_added.clear();
-                to_be_added.push_back(indices[i]);
-            } else if (current == min) {
-                to_be_added.push_back(indices[i]);
             }
+            to_be_added.push_back(indices[i]);
         }
 
         for (auto t: to_be_added) {
@@ -77,8 +89,9 @@ public:
         return min + 1;
     }
 
-    std::uint64_t Estimate(const std::vector<std::uint64_t> &indices) {
+    std::uint64_t Estimate(const std::string& kQuery) {
 
+        std::vector<std::uint64_t> indices { Hash(kQuery) };
         std::uint64_t min = Read(indices[0] * bit_width_);
 
         for (int i = 1; i < indices.size(); ++i) {
