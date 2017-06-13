@@ -41,36 +41,44 @@ int main(void) {
     }
     q_file.close();
 
-//    std::cout << queries.size() << std::endl;
-//    std::cout << utl::unique_size(queries) << std::endl;
-
     /*
      * Must know query size and unique query size at compile time.
      * Because std::bitset requires to.
      */
+    std::ofstream o_file ("output.csv", std::ios_base::app);
+
     constexpr std::uint64_t query_size = 200000;
     constexpr std::uint64_t unique_size = 135009;
-    constexpr std::uint64_t cache_size = unique_size / 16;
 
-    constexpr std::uint64_t window_size = query_size / 4;
-    constexpr std::uint64_t warm_up = 2 * window_size;
+	constexpr std::uint64_t cache_size = 131;
+	constexpr std::uint64_t window_size = 195;
+	constexpr std::uint64_t warm_up = 24960;
 
     constexpr std::uint64_t wc_ratio = (std::uint64_t) ceil(window_size / (double) cache_size);
     constexpr std::uint64_t bit_width_tiny = sizeof(wc_ratio) * 8 - __builtin_clzl(wc_ratio - 1);
 
-	constexpr std::uint64_t n_segments = 50;
+    FrequencyHistogram* t_histogram = new TinyLfuHistogram<window_size, bit_width_tiny>();
+    LfuCache* cache = new LfuCache(cache_size, t_histogram);
+    double tiny_hit_ratio = MissRatio(queries, cache, warm_up);
 
-    std::cout << "Segment count = " + n_segments << std::endl;
+    delete t_histogram;
+    delete cache;
+
+    constexpr std::uint64_t n_segments = 10;
     constexpr std::uint64_t wl_ratio = (std::uint64_t) ceil(window_size / (double) n_segments);
     constexpr std::uint64_t bit_witdh_straw = sizeof(wl_ratio) * 8 - __builtin_clzl(wl_ratio);
 
-    std::cout << "Bit width of Strawman = " << bit_witdh_straw << std::endl;
-    FrequencyHistogram* histogram = new StrawmanHistogram<window_size, n_segments, bit_witdh_straw>();
-    LfuCache* cache = new LfuCache(cache_size, histogram);
+    FrequencyHistogram* s_histogram = new StrawmanHistogram<window_size, n_segments, bit_witdh_straw>();
 
-    std::cout << "Strawman = " << MissRatio(queries, cache, warm_up) << std::endl;
+    cache = new LfuCache(cache_size, s_histogram);
+    double strawman_hit_ratio = MissRatio(queries, cache, warm_up);
 
-    delete histogram;
+    o_file << cache_size << ";" << window_size << ";" << warm_up << ";" << bit_width_tiny << ";" <<
+           bit_witdh_straw << ";" << tiny_hit_ratio << ";" << strawman_hit_ratio << std::endl;
+
+    o_file.close();
+    
+    delete s_histogram;
     delete cache;
     return 0;
 }
