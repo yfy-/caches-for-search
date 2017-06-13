@@ -8,7 +8,6 @@
 #include <bitset>
 #include <vector>
 #include <cmath>
-#include <iostream>
 #include "murmur3.h"
 #include "fnv1a.h"
 
@@ -69,17 +68,21 @@ public:
     std::uint64_t Add(const std::string& kQuery) {
 
         std::vector<std::uint64_t> indices { Hash(kQuery) };
-        std::uint64_t min = Read(indices[0] * bit_width_);
-        std::vector<std::uint64_t> to_be_added {indices[0]};
+        return Add(indices);
+    }
 
-        for (int i = 1; i < indices.size(); ++i) {
-            std::uint64_t current = Read(indices[i] * bit_width_);
+    std::uint64_t Add(const std::vector<std::uint64_t> & kIndices) {
+        std::uint64_t min = Read(kIndices[0] * bit_width_);
+        std::vector<std::uint64_t> to_be_added {kIndices[0]};
+
+        for (int i = 1; i < kIndices.size(); ++i) {
+            std::uint64_t current = Read(kIndices[i] * bit_width_);
 
             if (current < min) {
                 min = current;
                 to_be_added.clear();
             }
-            to_be_added.push_back(indices[i]);
+            to_be_added.push_back(kIndices[i]);
         }
 
         for (auto t: to_be_added) {
@@ -105,20 +108,29 @@ public:
         return min;
     }
 
-    void Reset() {
+    std::uint64_t Estimate(const std::vector<std::uint64_t>& kIndices) {
+
+        std::uint64_t min = Read(kIndices[0] * bit_width_);
+
+        for (int i = 1; i < kIndices.size(); ++i) {
+            std::uint64_t current = Read(kIndices[i] * bit_width_);
+
+            if (current < min) {
+                min = current;
+            }
+        }
+
+        return min;
+    }
+
+    void RightShiftCounters() {
         for (int i = 0; i < window_size_; ++i) {
             RightShift(i * bit_width_);
         }
     }
 
-    std::string ToString() {
-        std::string result = "";
-
-        for (int i = 0; i < window_size_; ++i) {
-            result += (std::to_string(Read(i * bit_width_)) + ", ");
-        }
-
-        return result;
+    void ResetCounters() {
+        counters_.reset();
     }
 };
 

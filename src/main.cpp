@@ -3,6 +3,7 @@
 #include <vector>
 #include <tiny_lfu_histogram.h>
 #include <algorithm>
+#include <strawman_histogram.h>
 #include "pure_lfu_histogram.h"
 #include "lfu_cache.h"
 
@@ -45,33 +46,31 @@ int main(void) {
 
     /*
      * Must know query size and unique query size at compile time.
-     * Because std::bitset requires to
+     * Because std::bitset requires to.
      */
     constexpr std::uint64_t query_size = 200000;
     constexpr std::uint64_t unique_size = 135009;
-    constexpr std::uint64_t cache_size = unique_size / 64;
-    constexpr std::uint64_t window_size = query_size / 8;
+    constexpr std::uint64_t cache_size = unique_size / 16;
+
+    constexpr std::uint64_t window_size = query_size / 4;
+    constexpr std::uint64_t warm_up = 2 * window_size;
+
     constexpr std::uint64_t wc_ratio = (std::uint64_t) ceil(window_size / (double) cache_size);
-    constexpr std::uint64_t bit_width = sizeof(wc_ratio) * 8 - __builtin_clzl(wc_ratio - 1);
-    constexpr std::uint64_t warm_up = 4 * window_size;
+    constexpr std::uint64_t bit_width_tiny = sizeof(wc_ratio) * 8 - __builtin_clzl(wc_ratio - 1);
 
-    std::cout << "Bit width = " << bit_width << std::endl;
-    FrequencyHistogram* t_histogram = new TinyLfuHistogram<window_size, bit_width>();
-    LfuCache* cache = new LfuCache(cache_size, t_histogram);
-    std::cout << "Tiny LFU = " << MissRatio(queries, cache, warm_up) << std::endl;
-    std::cout << "Tiny LFU Memory = " << sizeof(*t_histogram) << std::endl;
+	constexpr std::uint64_t n_segments = 50;
 
-    delete t_histogram;
+    std::cout << "Segment count = " + n_segments << std::endl;
+    constexpr std::uint64_t wl_ratio = (std::uint64_t) ceil(window_size / (double) n_segments);
+    constexpr std::uint64_t bit_witdh_straw = sizeof(wl_ratio) * 8 - __builtin_clzl(wl_ratio);
+
+    std::cout << "Bit width of Strawman = " << bit_witdh_straw << std::endl;
+    FrequencyHistogram* histogram = new StrawmanHistogram<window_size, n_segments, bit_witdh_straw>();
+    LfuCache* cache = new LfuCache(cache_size, histogram);
+
+    std::cout << "Strawman = " << MissRatio(queries, cache, warm_up) << std::endl;
+
+    delete histogram;
     delete cache;
-
-//    FrequencyHistogram* p_histogram = new PureLfuHistogram();
-//
-//    cache = new LfuCache(cache_size, p_histogram);
-//
-//    std::cout << "Pure LFU = " << MissRatio(queries, cache, warm_up) << std::endl;
-//    std::cout << "Pure LFU Memory = " << sizeof(*p_histogram) << std::endl;
-//
-//    delete p_histogram;
-//    delete cache;
     return 0;
 }

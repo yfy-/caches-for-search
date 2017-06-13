@@ -5,9 +5,7 @@
 #ifndef CENG778_PROJECT_TINY_LFU_HISTOGRAM_H
 #define CENG778_PROJECT_TINY_LFU_HISTOGRAM_H
 
-#include <cstdint>
 #include <bitset>
-#include <cmath>
 #include "frequency_histogram.h"
 #include "spectral_bloom_filter.h"
 
@@ -21,12 +19,10 @@ private:
     void IncrementWindowCounter() {
         for (int i = 0; i < window_counter_.size(); ++i) {
             window_counter_.flip(i);
-            if (window_counter_[i] == 1) {
-                return;
-            }
-        }
 
-        std::cout << "Overflow in window counter" << std::endl;
+            if (window_counter_[i] == 1)
+                return;
+        }
     }
 
 public:
@@ -50,8 +46,8 @@ public:
 
         if (window_counter_.to_ulong() == window_size_) {
             window_counter_ >>= 1;
-            doorkeeper_->Reset();
-            histogram_->Reset();
+            doorkeeper_->RightShiftCounters();
+            histogram_->RightShiftCounters();
         } else {
             IncrementWindowCounter();
         }
