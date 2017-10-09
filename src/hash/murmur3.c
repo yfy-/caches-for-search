@@ -1,5 +1,5 @@
 // Copyright 2017 folly
-#include <murmur3.h>
+#include "hash/murmur3.h"
 
 #ifdef __GNUC__
 #define FORCE_INLINE __attribute__((always_inline)) inline

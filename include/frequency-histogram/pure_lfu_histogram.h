@@ -1,10 +1,10 @@
 // Copyright 2017 folly
-#ifndef CENG778_PROJECT_INCLUDE_PURE_LFU_H
-#define CENG778_PROJECT_INCLUDE_PURE_LFU_H
+#ifndef CENG778_PROJECT_INCLUDE_FREQUENCY_HISTOGRAM_PURE_LFU_H
+#define CENG778_PROJECT_INCLUDE_FREQUENCY_HISTOGRAM_PURE_LFU_H
 
-#include <frequency_histogram.h>
 #include <unordered_map>
 #include <string>
+#include "frequency-histogram/frequency_histogram.h"
 
 class PureLfuHistogram : public FrequencyHistogram {
  private:
@@ -16,4 +16,4 @@ class PureLfuHistogram : public FrequencyHistogram {
 };
 
 
-#endif  // CENG778_PROJECT_INCLUDE_PURE_LFU_H
+#endif  // CENG778_PROJECT_FREQUENCY_HISTOGRAM_INCLUDE_PURE_LFU_H

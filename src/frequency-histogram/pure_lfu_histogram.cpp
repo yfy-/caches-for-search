@@ -1,6 +1,6 @@
 // Copyright 2017 folly
-#include <pure_lfu_histogram.h>
 #include <string>
+#include "frequency-histogram/pure_lfu_histogram.h"
 
 std::uint64_t PureLfuHistogram::Add(const std::string &query) {
   if (histogram.find(query) != histogram.end()) {

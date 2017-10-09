@@ -1,7 +1,7 @@
 // Copyright 2017 folly
 
-#ifndef CENG778_PROJECT_INCLUDE_FNV1A_H
-#define CENG778_PROJECT_INCLUDE_FNV1A_H
+#ifndef CENG778_PROJECT_INCLUDE_FNV1A_H_
+#define CENG778_PROJECT_INCLUDE_FNV1A_H_
 
 #include <cstdint>
 #include <string>

@@ -6,10 +6,11 @@ set(INC ./include)
 
 include_directories(${INC})
 
-set(SOURCE_FILES src/main.cpp src/lfu_cache.cpp ${INC}/lfu_cache.h
-        ${INC}/frequency_histogram.h src/frequency-histogram/pure_lfu_histogram.cpp
-        ${INC}/pure_lfu_histogram.h src/util.cpp ${INC}/util.h
-        ${INC}/spectral_bloom_filter.h ${INC}/fnv1a.h src/hash/fnv1a.cpp
-        ${INC}/murmur3.h src/hash/murmur3.c ${INC}/tiny_lfu_histogram.h ${INC}/strawman_histogram.h)
+set(SOURCE_FILES src/main.cpp src/cache/lfu_cache.cpp ${INC}/cache/lfu_cache.h
+        ${INC}/frequency-histogram/frequency_histogram.h src/frequency-histogram/pure_lfu_histogram.cpp
+        ${INC}/frequency-histogram/pure_lfu_histogram.h src/util.cpp ${INC}/util.h
+        ${INC}/spectral_bloom_filter.h ${INC}/hash/fnv1a.h src/hash/fnv1a.cpp
+        ${INC}/hash/murmur3.h src/hash/murmur3.c ${INC}/frequency-histogram/tiny_lfu_histogram.h
+        ${INC}/frequency-histogram/strawman_histogram.h ${INC}/cache/node.h src/cache/random_cache.cpp include/cache/random_cache.h include/cache/cache.h)
 
 add_executable(ceng778_project ${SOURCE_FILES})

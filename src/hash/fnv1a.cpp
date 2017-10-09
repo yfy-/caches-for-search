@@ -1,6 +1,7 @@
 // Copyright 2017 folly
-#include <fnv1a.h>
+
 #include <string>
+#include "hash/fnv1a.h"
 
 // FNV constants for 64 bit range
 const std::uint64_t kFnvPrime = 1099511628211U;

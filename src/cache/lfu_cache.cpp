@@ -1,10 +1,8 @@
 // Copyright 2017 folly
-#include <lfu_cache.h>
 #include <string>
+#include "cache/lfu_cache.h"
 
-LfuCache::LfuCache(std::uint64_t s, FrequencyHistogram* fh) {
-  size_ = s;
-  count_ = 0;
+LfuCache::LfuCache(std::uint64_t s, FrequencyHistogram* fh) : Cache(s) {
   head_ = new Node("");
   freq_hist_ = fh;
 }
@@ -24,7 +22,7 @@ bool LfuCache::IsExist(const std::string &query) {
 
   std::uint64_t new_freq = freq_hist_->Add(query);
 
-  Node* current = cache_[query];
+  Node* current = cache_table_[query];
 
   if (current != nullptr)
     result = true;
@@ -38,16 +36,16 @@ bool LfuCache::IsExist(const std::string &query) {
 
       head_->next = node;
       node->next = next;
-      cache_[query] = node;
+      cache_table_[query] = node;
       FindPlace(node, new_freq);
       count_++;
     } else {
       Node* victim = head_->next;
 
       if (new_freq >= freq_hist_->Estimate(victim->data)) {
-        cache_.erase(victim->data);
+        cache_table_.erase(victim->data);
         victim->data = query;
-        cache_[query] = victim;
+        cache_table_[query] = victim;
         FindPlace(victim, new_freq);
       }
     }
@@ -56,7 +54,7 @@ bool LfuCache::IsExist(const std::string &query) {
   return result;
 }
 
-void LfuCache::FindPlace(LfuCache::Node *node, std::uint64_t freq) {
+void LfuCache::FindPlace(Node* node, std::uint64_t freq) {
   while (node->next != nullptr &&
          freq >= freq_hist_->Estimate(node->next->data)) {
     Node* next = node->next;
@@ -65,8 +63,8 @@ void LfuCache::FindPlace(LfuCache::Node *node, std::uint64_t freq) {
 
     next->data = node->data;
     node->data = temp_data;
-    cache_[node->data] = node;
-    cache_[next->data] = next;
+    cache_table_[node->data] = node;
+    cache_table_[next->data] = next;
     node = node->next;
   }
 }

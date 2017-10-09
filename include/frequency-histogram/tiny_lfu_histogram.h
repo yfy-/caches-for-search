@@ -1,11 +1,11 @@
 // Copyright 2017 folly
-#ifndef CENG778_PROJECT_INCLUDE_TINY_LFU_HISTOGRAM_H
-#define CENG778_PROJECT_INCLUDE_TINY_LFU_HISTOGRAM_H
+#ifndef CENG778_PROJECT_INCLUDE_FREQUENCY_HISTOGRAM_TINY_LFU_HISTOGRAM_H
+#define CENG778_PROJECT_INCLUDE_FREQUENCY_HISTOGRAM_TINY_LFU_HISTOGRAM_H
 
-#include <frequency_histogram.h>
-#include <spectral_bloom_filter.h>
 #include <bitset>
 #include <string>
+#include "frequency-histogram/frequency_histogram.h"
+#include "spectral_bloom_filter.h"
 
 template <std::uint64_t window_size_, std::uint64_t bit_width_>
 class TinyLfuHistogram : public FrequencyHistogram {
@@ -25,10 +25,10 @@ class TinyLfuHistogram : public FrequencyHistogram {
   }
 
  public:
-  TinyLfuHistogram() {
+  explicit TinyLfuHistogram(std::uint32_t n_hash) {
     // Assuming that half of the queries are not repeating
-    histogram_ = new SpectralBloomFilter<window_size_ / 2, bit_width_>();
-    doorkeeper_ = new SpectralBloomFilter<window_size_, 1>();
+    histogram_ = new SpectralBloomFilter<window_size_ / 2, bit_width_>(n_hash);
+    doorkeeper_ = new SpectralBloomFilter<window_size_, 1>(n_hash);
   }
 
   uint64_t Add(const std::string &kQuery) override {
@@ -63,4 +63,4 @@ class TinyLfuHistogram : public FrequencyHistogram {
 };
 
 
-#endif //CENG778_PROJECT_INCLUDE_TINY_LFU_HISTOGRAM_H
+#endif //CENG778_PROJECT_INCLUDE_FREQUENCY_HISTOGRAM_TINY_LFU_HISTOGRAM_H

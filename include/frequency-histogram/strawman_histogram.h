@@ -1,12 +1,13 @@
 // Copyright 2017 folly
-#ifndef CENG778_PROJECT_INCLUDE_STRAWMAN_HISTOGRAM_H
-#define CENG778_PROJECT_INCLUDE_STRAWMAN_HISTOGRAM_H
 
-#include <frequency_histogram.h>
-#include <spectral_bloom_filter.h>
+#ifndef CENG778_PROJECT_INCLUDE_FREQUENCY_HISTOGRAM_STRAWMAN_HISTOGRAM_H
+#define CENG778_PROJECT_INCLUDE_FREQUENCY_HISTOGRAM_STRAWMAN_HISTOGRAM_H
+
 #include <deque>
 #include <string>
 #include <vector>
+#include "frequency-histogram/frequency_histogram.h"
+#include "spectral_bloom_filter.h"
 
 template <std::uint64_t window_size_, std::uint64_t n_segments_,
   std::uint64_t bit_width_>
@@ -15,7 +16,6 @@ class StrawmanHistogram : public FrequencyHistogram {
   typedef SpectralBloomFilter<window_size_ / n_segments_, bit_width_> Sbf;
 
   Sbf* current_;
-
   std::deque<Sbf*> fifo_;
   std::bitset<sizeof(n_segments_) * 8 -__builtin_clzl(n_segments_)>
       segment_counter_;
@@ -111,4 +111,4 @@ class StrawmanHistogram : public FrequencyHistogram {
   }
 };
 
-#endif  // CENG778_PROJECT_INCLUDE_STRAWMAN_HISTOGRAM_H
+#endif  // CENG778_PROJECT_INCLUDE_FREQUENCY_HISTOGRAM_STRAWMAN_HISTOGRAM_H
