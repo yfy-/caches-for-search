@@ -2,16 +2,16 @@
 #include <string>
 #include "cache/lfu_cache.h"
 
-LfuCache::LfuCache(std::uint64_t s, FrequencyHistogram* fh) : Cache(s) {
-  head_ = new Node("");
+LfuCache::LfuCache(std::uint32_t s, FrequencyHistogram* fh) : Cache(s) {
+  head_ = new NodeDoublyLinkedList::Node("");
   freq_hist_ = fh;
 }
 
 LfuCache::~LfuCache() {
-  Node* current = head_;
+  NodeDoublyLinkedList::Node* current = head_;
 
   while (current != nullptr) {
-    Node* next = current->next;
+    NodeDoublyLinkedList::Node* next = current->next;
     delete current;
     current = next;
   }
@@ -20,9 +20,9 @@ LfuCache::~LfuCache() {
 bool LfuCache::IsExist(const std::string &query) {
   bool result = false;
 
-  std::uint64_t new_freq = freq_hist_->Add(query);
+  std::uint32_t new_freq = freq_hist_->Add(query);
 
-  Node* current = cache_table_[query];
+  NodeDoublyLinkedList::Node* current = cache_table_[query];
 
   if (current != nullptr)
     result = true;
@@ -31,8 +31,8 @@ bool LfuCache::IsExist(const std::string &query) {
     FindPlace(current, new_freq);
   } else {
     if (count_ < size_) {
-      Node* node = new Node(query);
-      Node* next = head_->next;
+      NodeDoublyLinkedList::Node* node = new NodeDoublyLinkedList::Node(query);
+      NodeDoublyLinkedList::Node* next = head_->next;
 
       head_->next = node;
       node->next = next;
@@ -40,7 +40,7 @@ bool LfuCache::IsExist(const std::string &query) {
       FindPlace(node, new_freq);
       count_++;
     } else {
-      Node* victim = head_->next;
+      NodeDoublyLinkedList::Node* victim = head_->next;
 
       if (new_freq >= freq_hist_->Estimate(victim->data)) {
         cache_table_.erase(victim->data);
@@ -54,10 +54,10 @@ bool LfuCache::IsExist(const std::string &query) {
   return result;
 }
 
-void LfuCache::FindPlace(Node* node, std::uint64_t freq) {
+void LfuCache::FindPlace(NodeDoublyLinkedList::Node* node, std::uint32_t freq) {
   while (node->next != nullptr &&
          freq >= freq_hist_->Estimate(node->next->data)) {
-    Node* next = node->next;
+    NodeDoublyLinkedList::Node* next = node->next;
 
     std::string temp_data = next->data;
 
@@ -70,9 +70,9 @@ void LfuCache::FindPlace(Node* node, std::uint64_t freq) {
 }
 
 std::string LfuCache::ToString() {
-  std::string result = "";
+  std::string result;
 
-  Node* current = head_->next;
+  NodeDoublyLinkedList::Node* current = head_->next;
 
   while (current != nullptr) {
     result += current->data + ":" +

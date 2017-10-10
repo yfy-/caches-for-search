@@ -6,8 +6,8 @@
 
 class FrequencyHistogram {
  public:
-  virtual std::uint64_t Add(const std::string&) = 0;
-  virtual std::uint64_t Estimate(const std::string&) const = 0;
+  virtual std::uint32_t Add(const std::string&) = 0;
+  virtual std::uint32_t Estimate(const std::string&) const = 0;
 };
 
 

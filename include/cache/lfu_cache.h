@@ -7,21 +7,22 @@
 #include <utility>
 #include "frequency-histogram/frequency_histogram.h"
 #include "cache/cache.h"
+#include "cache/NodeDoublyLinkedList.h"
 
 class LfuCache : public Cache {
  private:
 
-  Cache::Node* head_;
-  std::unordered_map<std::string, Cache::Node*> cache_table_;
+  NodeDoublyLinkedList::Node* head_;
+  std::unordered_map<std::string, NodeDoublyLinkedList::Node*> cache_table_;
 
-  void FindPlace(Cache::Node*, std::uint64_t);
+  void FindPlace(NodeDoublyLinkedList::Node*, std::uint32_t);
 
  public:
 
   bool IsExist(const std::string&) override;
   std::string ToString();
 
-  LfuCache(std::uint64_t, FrequencyHistogram*);
+  LfuCache(std::uint32_t , FrequencyHistogram*);
 
   virtual ~LfuCache();
 };

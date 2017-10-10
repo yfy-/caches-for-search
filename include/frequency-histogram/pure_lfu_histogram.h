@@ -8,11 +8,11 @@
 
 class PureLfuHistogram : public FrequencyHistogram {
  private:
-  std::unordered_map<std::string, std::uint64_t> histogram;
+  std::unordered_map<std::string, std::uint32_t> histogram;
 
  public:
-  std::uint64_t Add(const std::string &) override;
-  std::uint64_t Estimate(const std::string &) const override;
+  std::uint32_t Add(const std::string &) override;
+  std::uint32_t Estimate(const std::string &) const override;
 };
 
 

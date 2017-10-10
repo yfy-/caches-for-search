@@ -7,7 +7,7 @@
 
 namespace utl {
   std::vector<std::string> split(std::string, char);
-  std::uint64_t unique_size(const std::vector<std::string> &);
+  std::uint32_t unique_size(const std::vector<std::string> &);
 }
 
 #endif  // CENG778_PROJECT_INCLUDE_UTIL_H

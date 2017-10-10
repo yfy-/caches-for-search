@@ -26,14 +26,14 @@ std::vector<std::string> split(std::string s, char c) {
   return v;
 }
 
-std::uint64_t unique_size(const std::vector<std::string> &vector) {
+std::uint32_t unique_size(const std::vector<std::string> &vector) {
   std::unordered_map<std::string, int> map;
 
   for (auto v : vector) {
     map[v] = 0;
   }
 
-  return (std::uint64_t) map.size();
+  return (std::uint32_t) map.size();
 }
 
 }  // namespace utl

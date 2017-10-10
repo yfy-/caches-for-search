@@ -7,10 +7,10 @@
 #include "frequency-histogram/frequency_histogram.h"
 #include "spectral_bloom_filter.h"
 
-template <std::uint64_t window_size_, std::uint64_t bit_width_>
+template <std::uint32_t window_size_, std::uint32_t bit_width_>
 class TinyLfuHistogram : public FrequencyHistogram {
  private:
-  std::bitset<sizeof(window_size_) * 8 -__builtin_clzl(window_size_)>
+  std::bitset<sizeof(window_size_) * 8 -__builtin_clz(window_size_)>
       window_counter_;
   SpectralBloomFilter<window_size_ / 2, bit_width_>* histogram_;
   SpectralBloomFilter<window_size_, 1>* doorkeeper_;
@@ -31,8 +31,8 @@ class TinyLfuHistogram : public FrequencyHistogram {
     doorkeeper_ = new SpectralBloomFilter<window_size_, 1>(n_hash);
   }
 
-  uint64_t Add(const std::string &kQuery) override {
-    std::uint64_t hist_count = 0;
+  uint32_t Add(const std::string &kQuery) override {
+    std::uint32_t hist_count = 0;
 
     if (doorkeeper_->Estimate(kQuery) == 0) {
       doorkeeper_->Add(kQuery);
@@ -52,7 +52,7 @@ class TinyLfuHistogram : public FrequencyHistogram {
     return hist_count + 1;
   }
 
-  uint64_t Estimate(const std::string &kQuery) const override {
+  uint32_t Estimate(const std::string &kQuery) const override {
     return doorkeeper_->Estimate(kQuery) + histogram_->Estimate(kQuery);
   }
 
