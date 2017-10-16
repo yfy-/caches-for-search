@@ -10,29 +10,21 @@
 template <std::uint32_t window_size_, std::uint32_t bit_width_>
 class TinyLfuHistogram : public FrequencyHistogram {
  private:
-  std::bitset<sizeof(window_size_) * 8 -__builtin_clz(window_size_)>
-      window_counter_;
+  std::uint32_t window_counter_;
   SpectralBloomFilter<window_size_ / 2, bit_width_>* histogram_;
   SpectralBloomFilter<window_size_, 1>* doorkeeper_;
-
-  void IncrementWindowCounter() {
-    for (int i = 0; i < window_counter_.size(); ++i) {
-      window_counter_.flip(i);
-
-      if (window_counter_[i] == 1)
-        return;
-    }
-  }
 
  public:
   explicit TinyLfuHistogram(std::uint32_t n_hash) {
     // Assuming that half of the queries are not repeating
     histogram_ = new SpectralBloomFilter<window_size_ / 2, bit_width_>(n_hash);
     doorkeeper_ = new SpectralBloomFilter<window_size_, 1>(n_hash);
+    window_counter_ = 0;
   }
 
   uint32_t Add(const std::string &kQuery) override {
     std::uint32_t hist_count = 0;
+    window_counter_++;
 
     if (doorkeeper_->Estimate(kQuery) == 0) {
       doorkeeper_->Add(kQuery);
@@ -41,14 +33,11 @@ class TinyLfuHistogram : public FrequencyHistogram {
       hist_count = histogram_->Add(kQuery);
     }
 
-    if (window_counter_.to_ulong() == window_size_) {
+    if (window_counter_ == window_size_) {
       window_counter_ >>= 1;
-      doorkeeper_->RightShiftCounters();
+      doorkeeper_->ResetCounters();
       histogram_->RightShiftCounters();
-    } else {
-      IncrementWindowCounter();
     }
-
     return hist_count + 1;
   }
 
@@ -59,6 +48,11 @@ class TinyLfuHistogram : public FrequencyHistogram {
   virtual ~TinyLfuHistogram() {
     delete histogram_;
     delete doorkeeper_;
+  }
+
+  std::string ToString() const override {
+    return "FullCounters -> " + histogram_->ToString() + "\nDoorKeeper -> "
+        + doorkeeper_->ToString();
   }
 };
 

@@ -49,7 +49,7 @@ bool RandomCache::IsExistWithFreqHist(const std::string &query) {
   return false;
 }
 void RandomCache::AddNewEntry(const std::string &query) {
-  NodeDoublyLinkedList::Node* node = new NodeDoublyLinkedList::Node(query);
+  NodeDoublyLinkedList::Node* node = new NodeDoublyLinkedList::Node(query, 0);
   cache_[count_] = node;
   cache_table_[query] = node;
   count_++;

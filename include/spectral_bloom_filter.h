@@ -7,6 +7,7 @@
 #include <bitset>
 #include <vector>
 #include <cmath>
+#include <set>
 #include "frequency-histogram/frequency_histogram.h"
 #include "hash/murmur3.h"
 #include "hash/fnv1a.h"
@@ -17,8 +18,9 @@ class SpectralBloomFilter {
  private:
   std::bitset<window_size_ * bit_width_> counters_;
   std::uint32_t n_hash_;
+  const std::uint32_t kMaxInt_;
 
-  std::uint32_t Read(std::uint32_t index) {
+  std::uint32_t Read(std::uint32_t index) const {
     std::uint32_t val = 0;
 
     for (int i = 0; i < bit_width_; ++i) {
@@ -54,7 +56,7 @@ class SpectralBloomFilter {
     std::uint32_t fnv = Fnv1a(kKey);
     std::uint64_t m_hash[2];
     MurmurHash3_x64_128(kKey.c_str(), (uint32_t) kKey.length(), 42, m_hash);
-    std::uint32_t murmur = static_cast<std::uint32_t >(m_hash[1] & 0x0000000FFFFFFFFULL);
+    auto murmur = static_cast<std::uint32_t >(m_hash[1] & 0x0000000FFFFFFFFULL);
 
     std::vector<std::uint32_t> hashed_indices = { fnv % window_size_,
                                                   murmur % window_size_ };
@@ -68,11 +70,9 @@ class SpectralBloomFilter {
 
  public:
 
-  explicit SpectralBloomFilter(uint32_t n_hash) {
-    if (n_hash < 2)
-      n_hash_ = 2;
-    else
-      n_hash_ = n_hash;
+  explicit SpectralBloomFilter(uint32_t n_hash):
+      kMaxInt_{ static_cast<std::uint32_t >(pow(2, bit_width_)) - 1 } {
+    n_hash_ = n_hash < 2 ? 2 : n_hash;
   }
 
   std::uint32_t Add(const std::string& kQuery) {
@@ -81,38 +81,37 @@ class SpectralBloomFilter {
   }
 
   std::uint32_t Add(const std::vector<std::uint32_t> & kIndices) {
-    std::uint32_t min = Read(kIndices[0] * bit_width_);
-    std::vector<std::uint32_t> to_be_added { kIndices[0] };
+    std::set<std::uint32_t> unq_indices(kIndices.begin(), kIndices.end());
+    std::vector<std::uint32_t> unq_indices_vec(unq_indices.begin(), unq_indices.end());
 
-    for (int i = 1; i < kIndices.size(); ++i) {
-      std::uint32_t current = Read(kIndices[i] * bit_width_);
+    std::uint32_t min = Read(unq_indices_vec[0] * bit_width_);
+    std::vector<std::uint32_t> to_be_added { unq_indices_vec[0] };
+
+    for (int i = 1; i < unq_indices_vec.size(); ++i) {
+      std::uint32_t current = Read(unq_indices_vec[i] * bit_width_);
 
       if (current < min) {
         min = current;
         to_be_added.clear();
       }
-      to_be_added.push_back(kIndices[i]);
+
+      if (current == min)
+        to_be_added.push_back(unq_indices_vec[i]);
     }
 
     for (auto t : to_be_added) {
       Add(t * bit_width_);
     }
 
+    if (min == kMaxInt_)
+      return min;
+
     return min + 1;
   }
 
   std::uint32_t Estimate(const std::string& kQuery) {
     std::vector<std::uint32_t> indices { Hash(kQuery) };
-    std::uint32_t min = Read(indices[0] * bit_width_);
-
-    for (int i = 1; i < indices.size(); ++i) {
-      std::uint32_t current = Read(indices[i] * bit_width_);
-
-      if (current < min) {
-        min = current;
-      }
-    }
-    return min;
+    return Estimate(indices);
   }
 
   std::uint32_t Estimate(const std::vector<std::uint32_t>& kIndices) {
@@ -138,6 +137,16 @@ class SpectralBloomFilter {
 
   void ResetCounters() {
     counters_.reset();
+  }
+
+  std::string ToString() const {
+    std::string result;
+
+    for (int i = 0; i < window_size_; ++i) {
+      result += std::to_string(Read(i * bit_width_)) + " ";
+    }
+
+    return result.substr(0, result.size() - 1);
   }
 };
 

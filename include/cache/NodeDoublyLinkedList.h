@@ -13,9 +13,11 @@ class NodeDoublyLinkedList {
 
   struct Node {
     std::string data;
+    std::uint32_t freq;
     Node* next;
     Node* prev;
-    explicit Node(const std::string &d) : data{d}, next{nullptr}, prev{nullptr} {}
+    Node(const std::string& d, const std::uint32_t& f) : data{d}, freq{f},
+                                                         next{nullptr}, prev{nullptr} {}
   };
 
   NodeDoublyLinkedList();

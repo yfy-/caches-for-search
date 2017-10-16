@@ -14,16 +14,16 @@ class LfuCache : public Cache {
 
   NodeDoublyLinkedList* cache_;
   std::unordered_map<std::string, NodeDoublyLinkedList::Node*> cache_table_;
+  std::uint32_t cap_;
 
-  void PutBeforeMoreFrequent(NodeDoublyLinkedList::Node *, std::uint32_t);
+  void PutBeforeMoreFrequent(NodeDoublyLinkedList::Node *);
 
  public:
 
   bool IsExist(const std::string&) override;
-  /*std::string ToString();*/
+  std::string ToString() const override;
 
-  LfuCache(std::uint32_t , FrequencyHistogram*);
-
+  LfuCache(std::uint32_t , FrequencyHistogram*, std::uint32_t);
   virtual ~LfuCache();
 };
 

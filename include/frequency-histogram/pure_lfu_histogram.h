@@ -13,6 +13,7 @@ class PureLfuHistogram : public FrequencyHistogram {
  public:
   std::uint32_t Add(const std::string &) override;
   std::uint32_t Estimate(const std::string &) const override;
+  std::string ToString() const override;
 };
 
 

@@ -5,8 +5,8 @@
 #include "cache/NodeDoublyLinkedList.h"
 
 NodeDoublyLinkedList::NodeDoublyLinkedList() {
-  head_ = new Node("");
-  tail_ = new Node("");
+  head_ = new Node("", 0);
+  tail_ = new Node("", 0);
 
   head_->next = tail_;
   tail_->prev = head_;
@@ -32,7 +32,7 @@ std::string NodeDoublyLinkedList::ToString() {
   Node* curr = head_->next;
 
   while (curr != tail_) {
-    result += curr->data + " -> ";
+    result += curr->data + ":" + std::to_string(curr->freq) + " -> ";
     curr = curr->next;
   }
 

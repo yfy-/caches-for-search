@@ -17,29 +17,23 @@ class StrawmanHistogram : public FrequencyHistogram {
 
   Sbf* current_;
   std::deque<Sbf*> fifo_;
-  std::bitset<sizeof(n_segments_) * 8 -__builtin_clz(n_segments_)>
-      segment_counter_;
-
-  void IncrementSegmentCounter() {
-    for (int i = 0; i < segment_counter_.size(); ++i) {
-      segment_counter_.flip(i);
-
-      if (segment_counter_[i] == 1)
-        return;
-    }
-  }
+  std::uint32_t segment_counter_;
+  std::uint32_t n_hash_;
 
   std::vector<std::uint32_t> Hash(const std::string &kKey) const {
     std::uint32_t fnv = Fnv1a(kKey);
     std::uint64_t m_hash[2];
-
     MurmurHash3_x64_128(kKey.c_str(), (uint32_t) kKey.length(), 42, m_hash);
-    std::uint32_t murmur = static_cast<std::uint32_t >(m_hash[1] & 0x00000000FFFFFFFFULL);
-    std::uint32_t combined = fnv + murmur;
+    auto murmur = static_cast<std::uint32_t >(m_hash[1] & 0x0000000FFFFFFFFULL);
 
-    return std::vector<std::uint32_t> {fnv % (window_size_ / n_segments_),
-          murmur % (window_size_ / n_segments_),
-          combined % (window_size_ / n_segments_)};
+    std::vector<std::uint32_t> hashed_indices = { fnv % (window_size_ / n_segments_),
+                                                  murmur % (window_size_  / n_segments_)};
+
+    for (int i = 1; i <= n_hash_ - 2; ++i) {
+      hashed_indices.push_back((fnv + i * murmur) % (window_size_ / n_segments_));
+    }
+
+    return hashed_indices;
   }
 
   uint32_t Estimate(const std::vector<std::uint32_t> indices) const {
@@ -57,46 +51,37 @@ class StrawmanHistogram : public FrequencyHistogram {
   }
 
  public:
-  StrawmanHistogram() {
+  explicit StrawmanHistogram(std::uint32_t n_hash) {
+    n_hash_ = n_hash < 2 ? 2 : n_hash;
+
     for (int i = 0; i < n_segments_ - 1; ++i) {
-      fifo_.push_back(new Sbf());
+      fifo_.push_back(new Sbf(n_hash));
     }
 
-    current_ = new Sbf();
+    current_ = new Sbf(n_hash);
+    segment_counter_ = 0;
   }
 
   uint32_t Add(const std::string &kQuery) override {
     std::vector<std::uint32_t> indices = Hash(kQuery);
     current_->Add(indices);
+    segment_counter_++;
 
     std::uint32_t freq = Estimate(indices);
 
-    if (segment_counter_.to_ulong() == window_size_ / n_segments_) {
+    if (segment_counter_ == window_size_ / n_segments_) {
       fifo_.push_back(current_);
       current_ = fifo_.front();
       fifo_.pop_front();
       current_->ResetCounters();
-      segment_counter_.reset();
-    } else {
-      IncrementSegmentCounter();
+      segment_counter_ = 0;
     }
-
     return freq;
   }
 
   uint32_t Estimate(const std::string &kQuery) const override {
     std::vector<std::uint32_t> indices = Hash(kQuery);
-    std::uint32_t freq = 0;
-
-    // Why do we need typename keyword?
-
-    typename std::deque<Sbf*>::const_iterator it = fifo_.begin();
-    while (it != fifo_.end()) {
-      freq += (*it)->Estimate(indices);
-      it++;
-    }
-
-    return freq + current_->Estimate(indices);
+    return Estimate(indices);
   }
 
   virtual ~StrawmanHistogram() {
@@ -108,6 +93,18 @@ class StrawmanHistogram : public FrequencyHistogram {
     }
 
     delete current_;
+  }
+
+  std::string ToString() const override {
+    std::string result = current_->ToString() + " -> ";
+
+    typename std::deque<Sbf*>::const_iterator it = fifo_.begin();
+    while (it != fifo_.end()) {
+      result += (*it)->ToString() + " -> ";
+      it++;
+    }
+
+    return result.substr(0, result.size() - 4);
   }
 };
 
