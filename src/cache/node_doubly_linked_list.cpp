@@ -2,7 +2,7 @@
 // Created by yfy on 10/10/17.
 //
 
-#include "cache/NodeDoublyLinkedList.h"
+#include "cache/node_doubly_linked_list.h"
 
 NodeDoublyLinkedList::NodeDoublyLinkedList() {
   head_ = new Node("", 0);
@@ -32,7 +32,7 @@ std::string NodeDoublyLinkedList::ToString() {
   Node* curr = head_->next;
 
   while (curr != tail_) {
-    result += curr->data + ":" + std::to_string(curr->freq) + " -> ";
+    result += curr->data + ":" + std::to_string(curr->score) + " -> ";
     curr = curr->next;
   }
 

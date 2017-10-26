@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include "cache/cache.h"
-#include "cache/NodeDoublyLinkedList.h"
+#include "cache/node_doubly_linked_list.h"
 
 class RandomCache : public Cache {
  public:

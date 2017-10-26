@@ -2,10 +2,9 @@
 #include <string>
 #include "cache/lfu_cache.h"
 
-LfuCache::LfuCache(std::uint32_t s, FrequencyHistogram* fh, std::uint32_t c = 0) : Cache(s) {
+LfuCache::LfuCache(std::uint32_t s, FrequencyHistogram* fh) : Cache(s) {
   cache_ = new NodeDoublyLinkedList();
   freq_hist_ = fh;
-  cap_ = c;
 }
 
 LfuCache::~LfuCache() {
@@ -23,12 +22,7 @@ bool LfuCache::IsExist(const std::string &query) {
     result = true;
 
   if (result) {
-    if (cap_ != 0) {
-      if (current->freq != cap_)
-        current->freq++;
-    } else
-      current->freq++;
-
+    current->score++;
     PutBeforeMoreFrequent(current);
   } else {
     if (count_ < size_) {
@@ -43,7 +37,7 @@ bool LfuCache::IsExist(const std::string &query) {
       if (estimated_freq >= freq_hist_->Estimate(victim->data)) {
         cache_table_.erase(victim->data);
         victim->data = query;
-        victim->freq = estimated_freq;
+        victim->score = estimated_freq;
         cache_table_[query] = victim;
         PutBeforeMoreFrequent(victim);
       }
@@ -58,7 +52,7 @@ void LfuCache::PutBeforeMoreFrequent(NodeDoublyLinkedList::Node *node) {
   NodeDoublyLinkedList::Node* curr = node;
 
   while ((curr->next != cache_->tail_) && (curr->next != nullptr)) {
-    if (node->freq < curr->next->freq) {
+    if (node->score < curr->next->score) {
       more_freq = curr->next;
       cache_->MoveBefore(node, more_freq);
       break;

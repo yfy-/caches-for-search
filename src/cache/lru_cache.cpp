@@ -27,7 +27,7 @@ bool LruCache::IsExist(const std::string &query) {
     if (count_ < size_) {
       current = new NodeDoublyLinkedList::Node(query, 0);
       cache_->PushBack(current);
-      cache_table_[query]= current;
+      cache_table_[query] = current;
       count_++;
     } else {
       NodeDoublyLinkedList::Node* victim = cache_->head_->next;

@@ -13,10 +13,10 @@ class NodeDoublyLinkedList {
 
   struct Node {
     std::string data;
-    std::uint32_t freq;
+    std::uint32_t score;
     Node* next;
     Node* prev;
-    Node(const std::string& d, const std::uint32_t& f) : data{d}, freq{f},
+    Node(const std::string& d, const std::uint32_t& f) : data{d}, score{f},
                                                          next{nullptr}, prev{nullptr} {}
   };
 
