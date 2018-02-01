@@ -13,6 +13,6 @@ set(SOURCE_FILES src/main.cpp src/cache/lfu_cache.cpp ${INC}/cache/lfu_cache.h
         ${INC}/hash/murmur3.h src/hash/murmur3.c ${INC}/frequency-histogram/tiny_lfu_histogram.h
         ${INC}/frequency-histogram/strawman_histogram.h src/cache/random_cache.cpp
         ${INC}/cache/random_cache.h ${INC}/cache/cache.h src/cache/node_doubly_linked_list.cpp
-        ${INC}/cache/node_doubly_linked_list.h include/cache/lru_cache.h src/cache/lru_cache.cpp include/cache/greedy_dual_size_k_cache.h src/cache/greedy_dual_size_k_cache.cpp)
+        ${INC}/cache/node_doubly_linked_list.h include/cache/lru_cache.h src/cache/lru_cache.cpp include/cache/greedy_dual_size_k_cache.h src/cache/greedy_dual_size_k_cache.cpp include/frequency-histogram/window_lfu_histogram.h src/frequency-histogram/window_lfu_histogram.cpp)
 
 add_executable(ceng778_project ${SOURCE_FILES})

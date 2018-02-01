@@ -1,0 +1,49 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{booktabs} % For formal tables
+\usepackage{url}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{array, multirow}
+\usepackage{color}
+
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote
+                                                   % with conference
+                                                   % information in
+                                                   % first column
+\pagestyle{plain}
+\makeatletter
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+
+\begin{document}
+\title{Analysis of Efficient Cache Admission Policies on Web Search}
+
+\author{Erman Yafay}
+\affiliation{%
+  \institution{Middle East Technical University}
+  \city{Ankara}
+}
+\email{erman.yafay@metu.edu.tr}
+
+\author{Ismail Sengor Altingovde}
+\affiliation{%
+  \institution{Middle East Technical University}
+  \city{Ankara}
+}
+\email{altingovde@ceng.metu.edu.tr}
+
+\begin{abstract}
+  Have the abstract here...
+\end{abstract}
+
+\maketitle
+
+\input{body}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sample-bibliography}
+
+\end{document}

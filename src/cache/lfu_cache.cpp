@@ -22,7 +22,7 @@ bool LfuCache::IsExist(const std::string &query) {
     result = true;
 
   if (result) {
-    current->score++;
+    current->score = estimated_freq;
     PutBeforeMoreFrequent(current);
   } else {
     if (count_ < size_) {

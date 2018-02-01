@@ -5,10 +5,14 @@
 #include "cache/greedy_dual_size_k_cache.h"
 
 GreedyDualSizeKCache::GreedyDualSizeKCache(std::uint32_t s,
-                                           FrequencyHistogram* fh) : Cache(s) {
+                                           std::uint32_t k,
+                                           FrequencyHistogram* fh) :
+    Cache(s),
+    k_{k},
+    offset_{0} {
+
   cache_ = new NodeDoublyLinkedList();
   freq_hist_ = fh;
-  offset_ = 0;
 }
 
 GreedyDualSizeKCache::~GreedyDualSizeKCache() {
@@ -25,11 +29,12 @@ bool GreedyDualSizeKCache::IsExist(const std::string& query) {
     result = true;
 
   if (result) {
-    current->score = offset_ + current->score + 1;
+    current->score = HValue(estimated_freq);
+
     PutBeforeHigherHValue(current);
   } else {
     if (count_ < size_) {
-      current = new NodeDoublyLinkedList::Node(query, estimated_freq + offset_);
+      current = new NodeDoublyLinkedList::Node(query, HValue(estimated_freq));
       cache_->PushFront(current);
       cache_table_[query] = current;
       PutBeforeHigherHValue(current);
@@ -41,7 +46,7 @@ bool GreedyDualSizeKCache::IsExist(const std::string& query) {
         offset_ = victim->score;
         cache_table_.erase(victim->data);
         victim->data = query;
-        victim->score = estimated_freq + offset_;
+        victim->score = HValue(estimated_freq);
         cache_table_[query] = victim;
         PutBeforeHigherHValue(victim);
       }

@@ -1,3 +1,7 @@
 cmake-build-debug/
 .idea/
 /resource
+GRTAGS
+GTAGS
+GPATH
+.dir-locals.el*

@@ -3,17 +3,15 @@
 #include "frequency-histogram/pure_lfu_histogram.h"
 
 std::uint32_t PureLfuHistogram::Add(const std::string &query) {
-  if (histogram.find(query) != histogram.end()) {
-    histogram[query]++;
-  } else {
-    histogram[query] = 1;
-  }
-
-  return histogram[query];
+  histogram[query]++;
+  return histogram.at(query);
 }
 
 std::uint32_t PureLfuHistogram::Estimate(const std::string &query) const {
-  return histogram.at(query);
+  if (histogram.find(query) != histogram.end())
+    return histogram.at(query);
+
+  return 0;
 }
 std::string PureLfuHistogram::ToString() const {
   return "";

@@ -1,0 +1,151 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{9}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[\protect\citeauthoryear{Arlitt, Cherkasova, Dilley, Friedrich, and
+  Jin}{Arlitt et~al\mbox{.}}{2000}]%
+        {arlitt2000evaluating}
+\bibfield{author}{\bibinfo{person}{Martin Arlitt}, \bibinfo{person}{Ludmila
+  Cherkasova}, \bibinfo{person}{John Dilley}, \bibinfo{person}{Rich Friedrich},
+  {and} \bibinfo{person}{Tai Jin}.} \bibinfo{year}{2000}\natexlab{}.
+\newblock \showarticletitle{Evaluating content management techniques for web
+  proxy caches}.
+\newblock \bibinfo{journal}{\emph{ACM SIGMETRICS Performance Evaluation
+  Review}} \bibinfo{volume}{27}, \bibinfo{number}{4} (\bibinfo{year}{2000}),
+  \bibinfo{pages}{3--11}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Bloom}{Bloom}{1970}]%
+        {bloom1970space}
+\bibfield{author}{\bibinfo{person}{Burton~H Bloom}.}
+  \bibinfo{year}{1970}\natexlab{}.
+\newblock \showarticletitle{Space/time trade-offs in hash coding with allowable
+  errors}.
+\newblock \bibinfo{journal}{\emph{Commun. ACM}} \bibinfo{volume}{13},
+  \bibinfo{number}{7} (\bibinfo{year}{1970}), \bibinfo{pages}{422--426}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Breslau, Cao, Fan, Phillips, and
+  Shenker}{Breslau et~al\mbox{.}}{1999}]%
+        {breslau1999web}
+\bibfield{author}{\bibinfo{person}{Lee Breslau}, \bibinfo{person}{Pei Cao},
+  \bibinfo{person}{Li Fan}, \bibinfo{person}{Graham Phillips}, {and}
+  \bibinfo{person}{Scott Shenker}.} \bibinfo{year}{1999}\natexlab{}.
+\newblock \showarticletitle{Web caching and Zipf-like distributions: Evidence
+  and implications}. In \bibinfo{booktitle}{\emph{INFOCOM'99. Eighteenth Annual
+  Joint Conference of the IEEE Computer and Communications Societies.
+  Proceedings. IEEE}}, Vol.~\bibinfo{volume}{1}. IEEE,
+  \bibinfo{pages}{126--134}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Cohen and Matias}{Cohen and Matias}{2003}]%
+        {cohen2003spectral}
+\bibfield{author}{\bibinfo{person}{Saar Cohen} {and} \bibinfo{person}{Yossi
+  Matias}.} \bibinfo{year}{2003}\natexlab{}.
+\newblock \showarticletitle{Spectral bloom filters}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 2003 ACM SIGMOD international
+  conference on Management of data}}. ACM, \bibinfo{pages}{241--252}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Cormode and Muthukrishnan}{Cormode and
+  Muthukrishnan}{2005}]%
+        {cormode2005improved}
+\bibfield{author}{\bibinfo{person}{Graham Cormode} {and} \bibinfo{person}{Shan
+  Muthukrishnan}.} \bibinfo{year}{2005}\natexlab{}.
+\newblock \showarticletitle{An improved data stream summary: the count-min
+  sketch and its applications}.
+\newblock \bibinfo{journal}{\emph{Journal of Algorithms}} \bibinfo{volume}{55},
+  \bibinfo{number}{1} (\bibinfo{year}{2005}), \bibinfo{pages}{58--75}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Dimitropoulos, Stoecklin, Hurley, and
+  Kind}{Dimitropoulos et~al\mbox{.}}{2008}]%
+        {dimitropoulos2008eternal}
+\bibfield{author}{\bibinfo{person}{Xenofontas Dimitropoulos},
+  \bibinfo{person}{Marc Stoecklin}, \bibinfo{person}{Paul Hurley}, {and}
+  \bibinfo{person}{Andreas Kind}.} \bibinfo{year}{2008}\natexlab{}.
+\newblock \showarticletitle{The eternal sunshine of the sketch data structure}.
+\newblock \bibinfo{journal}{\emph{Computer Networks}} \bibinfo{volume}{52},
+  \bibinfo{number}{17} (\bibinfo{year}{2008}), \bibinfo{pages}{3248--3257}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Einziger and Friedman}{Einziger and
+  Friedman}{2014}]%
+        {einziger2014tinylfu}
+\bibfield{author}{\bibinfo{person}{Gil Einziger} {and} \bibinfo{person}{Roy
+  Friedman}.} \bibinfo{year}{2014}\natexlab{}.
+\newblock \showarticletitle{Tinylfu: A highly efficient cache admission
+  policy}. In \bibinfo{booktitle}{\emph{Parallel, Distributed and Network-Based
+  Processing (PDP), 2014 22nd Euromicro International Conference on}}. IEEE,
+  \bibinfo{pages}{146--153}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Fan, Cao, Almeida, and Broder}{Fan
+  et~al\mbox{.}}{2000}]%
+        {fan2000summary}
+\bibfield{author}{\bibinfo{person}{Li Fan}, \bibinfo{person}{Pei Cao},
+  \bibinfo{person}{Jussara Almeida}, {and} \bibinfo{person}{Andrei~Z Broder}.}
+  \bibinfo{year}{2000}\natexlab{}.
+\newblock \showarticletitle{Summary cache: a scalable wide-area web cache
+  sharing protocol}.
+\newblock \bibinfo{journal}{\emph{IEEE/ACM Transactions on Networking (TON)}}
+  \bibinfo{volume}{8}, \bibinfo{number}{3} (\bibinfo{year}{2000}),
+  \bibinfo{pages}{281--293}.
+\newblock
+
+
+\bibitem[\protect\citeauthoryear{Karakostas and Serpanos}{Karakostas and
+  Serpanos}{2002}]%
+        {karakostas2002exploitation}
+\bibfield{author}{\bibinfo{person}{George Karakostas} {and}
+  \bibinfo{person}{Dimitrios~N Serpanos}.} \bibinfo{year}{2002}\natexlab{}.
+\newblock \showarticletitle{Exploitation of different types of locality for web
+  caches}. In \bibinfo{booktitle}{\emph{Computers and Communications, 2002.
+  Proceedings. ISCC 2002. Seventh International Symposium on}}. IEEE,
+  \bibinfo{pages}{207--212}.
+\newblock
+
+
+\end{thebibliography}

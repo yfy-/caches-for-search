@@ -2,11 +2,11 @@ import math
 import subprocess
 
 filepath = '../src/main.cpp'
-query_size = 200000
-unique_size = 135009
+query_size = 2000000
+unique_size = 605046
 
-for k in range(10, 1, -1):
-    cache_size = unique_size / (2 ** k)
+for k in range(1, 6):
+    cache_size = (unique_size // 10) * 
     for l in range(1, 6):
         window_size = cache_size * (2 ** l)
 
@@ -27,7 +27,7 @@ for k in range(10, 1, -1):
             file.writelines(data)
 
         print subprocess.check_output(['make'])
-        process = subprocess.Popen(['./ceng778_project'], stdout=subprocess.PIPE)
+        process = subprocess.Popen(['./ceng778_project', '1'], stdout=subprocess.PIPE)
         process.wait()
         for line in process.stdout:
             print(line)
