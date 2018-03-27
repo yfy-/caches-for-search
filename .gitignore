@@ -5,3 +5,5 @@ GRTAGS
 GTAGS
 GPATH
 .dir-locals.el*
+doc/zipf*
+doc/plots.py
