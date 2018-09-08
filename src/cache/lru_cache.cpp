@@ -74,4 +74,3 @@ bool LruCache::IsExistWithFreqHist(const std::string &query) {
 
   return result;
 }
-

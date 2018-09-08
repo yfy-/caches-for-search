@@ -1,0 +1,71 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{booktabs} % For formal tables
+\usepackage{url}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{array, multirow}
+\usepackage{color}
+\usepackage{float}
+% * <ermanyafay@gmail.com> 2018-05-21T13:04:52.859Z:
+%
+% ^.
+
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote
+                                                   % with conference
+                                                   % information in
+                                                   % first column
+\pagestyle{plain}
+\makeatletter
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+
+\begin{document}
+\title{On the Impact of Storing Query Frequency History for Search Engine Result Caching }
+
+\begin{comment}
+\author{Erman Yafay}
+\affiliation{%
+  \institution{Middle East Technical University}
+  \city{Ankara}
+}
+\email{erman.yafay@metu.edu.tr}
+
+\author{Ismail Sengor Altingovde}
+\affiliation{%
+  \institution{Middle East Technical University}
+  \city{Ankara}
+}
+\email{altingovde@ceng.metu.edu.tr}
+\end{comment}
+
+\begin{abstract}
+  Past frequency statistics of queries is among the key signals to
+  decide on the content of the search engine result caches. In this
+  paper, we first investigate the impact of the sample size for
+  frequency statistics for most popular cache eviction strategies in
+  the literature, and show that cache performance improves with larger
+  samples, i.e., by storing the frequencies of all (or, most of) the
+  queries seen by the search engine. Secondly, we show that a recently
+  proposed approach based on Counting Bloom Filters serve well to
+  store the query frequency statistics in a compact a manner, while
+  still providing comparable cache performance to keeping all
+  frequencies in a raw manner.
+\end{abstract}
+
+\maketitle
+
+\input{body}
+
+\bibliographystyle{ACM-Reference-Format}
+% * <ermanyafay@gmail.com> 2018-05-21T13:04:59.848Z:
+%
+% ^.
+% * <ermanyafay@gmail.com> 2018-05-21T13:04:56.647Z:
+%
+% ^.
+\bibliography{sample-bibliography}
+
+\end{document}

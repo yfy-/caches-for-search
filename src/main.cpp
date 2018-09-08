@@ -1,238 +1,366 @@
 // Copyright 2017 folly
 
+#include <cstdio>
+#include <cmath>
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <string>
-#include <chrono>
-#include <cstdio>
-#include "doubly_linked_list.h"
+#include <thread>
+#include "policy/replacement/only_eviction_replacement_policy.h"
+#include "policy/eviction/lru_eviction.h"
+#include "policy/eviction/inmemory_lfu_eviction.h"
+#include "policy/eviction/lfu_eviction.h"
+#include "frequency-histogram/pure_lfu_histogram.h"
+#include "policy/admission/frequency_admission.h"
+#include "policy/replacement/admission_replacement_policy.h"
+#include "policy/replacement/admission_controlled_replacement_policy.h"
+#include "policy/replacement/static_dynamic_replacement_policy.h"
+#include "hitrate_evaluation.h"
+#include "frequency-histogram/tiny_lfu_histogram.h"
+#include "policy/eviction/inmemory_gdsfk.h"
+#include "policy/eviction/gdsfk.h"
 
-// constexpr std::uint32_t CACHE_SIZE = 281450;
-// constexpr std::uint32_t WINDOW_SIZE = 8000;
-// constexpr std::uint32_t QUERY_SIZE = 1000000;
 
-// struct ExperimentResult {
-//   double hit_rate;
-//   double avg_resp_t;
-// };
+void GdsfkEval(const std::vector<std::string>& train,
+               const std::vector<std::string>& test, std::uint32_t warmup,
+               HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+                 std::uint32_t until_multip, std::uint8_t k);
 
-// ExperimentResult Experiment(const std::vector<std::string> &queries, Cache *cache,
-//                   std::uint32_t warmUp) {
-//   double hit = 0;
-//   double miss = 0;
-//   double total_resp = 0;
+void InmemGdsfkEval(const std::vector<std::string>& test, std::uint32_t warmup,
+               HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+               std::uint32_t until_multip, std::uint8_t k);
 
-//   for (auto q : queries) {
-//     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-//     bool is_hit = cache->IsExist(q);
-//     std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-//     std::chrono::duration<double, std::milli> diff = end - start;
-//     // std::cout << cache->GetFreqHist_()->ToString() + "\n";
-//     // std::cout << cache->ToString() + "\n";
+void AcEval(std::uint32_t, const std::vector<std::string>&,
+            const std::vector<std::string>&, std::uint32_t, std::uint32_t,
+            std::uint32_t);
 
-//     total_resp += diff.count();
-//     if (warmUp > 0) {
-//       warmUp--;
-//       continue;
-//     }
+void FullHistEvEval(const std::vector<std::string>&,
+                    const std::vector<std::string>&, std::uint32_t,
+                    HitrateEvaluation* const, std::uint32_t, std::uint32_t);
 
-//     if (is_hit)
-//       hit++;
-//     else
-//       miss++;
-//   }
-//   return { hit / (hit + miss), total_resp / static_cast<double>(queries.size()) };
-// }
+void FullHistAdmEval(const std::vector<std::string>&,
+                     const std::vector<std::string>&, std::uint32_t,
+                     HitrateEvaluation* const, std::uint32_t, std::uint32_t);
 
-// void WriteExperimentResult(ExperimentResult exp, std::string data,
-//                            std::string admission, std::string eviction) {
-//   std::string file_path = "./" + data + "/" + admission + "_" + eviction + ".csv";
-//   std::ofstream out(file_path, std::ios_base::app);
-//   if (out.is_open()) {
-//     out << CACHE_SIZE << ";" << WINDOW_SIZE << ";" << exp.hit_rate <<
-//         ";" << exp.avg_resp_t << "\n";
-//   }
+void InMemLfuEval(const std::vector<std::string>&, std::uint32_t,
+                  HitrateEvaluation* const, std::uint32_t, std::uint32_t);
 
-//   out.close();
-// }
+void LruEval(const std::vector<std::string>&, std::uint32_t,
+             HitrateEvaluation* const, std::uint32_t, std::uint32_t);
 
-// int main(int argc, char* argv[]) {
-//   srand(time(NULL));
-//   std::vector<std::string> queries;
-//   if (argc == 2) {
-//       FILE* infile = fopen("../resource/zipf_2.0_100.bin", "rb");
-//       std::uint32_t buffer[QUERY_SIZE];
-//       fread(buffer, QUERY_SIZE, sizeof(* buffer), infile);
-//       for (int i = 0; i < QUERY_SIZE; ++i) {
-//           queries.push_back(std::to_string(buffer[i]));
-//       }
-//   } else {
-//       std::ifstream q_file("../resource/aol_big_train_sorted.txt");
-//       std::uint32_t data_size = 1000000;
-//       std::uint32_t counter = 0;
-//       if (q_file.is_open()) {
-//           std::string line;
+void SdcEval(std::uint32_t,
+             const std::vector<std::string>&,
+             const std::vector<std::string>&,
+             HitrateEvaluation* const,
+             std::uint32_t,
+             std::uint32_t,
+             std::uint32_t);
 
-//           while (getline(q_file, line) && counter < data_size) {
-//               queries.push_back(line);
-//               counter++;
-//           }
-//       }
-//       q_file.close();
-//       std::cout << queries.size();
-//   }
-
-//   /*
-//    * * Must know query size and unique query size at compile time.
-//    * * Because std::bitset requires to.
-//   */
-
-//   // constexpr std::uint32_t strawman_bit_width = sizeof(WINDOW_SIZE) * 8 - __builtin_clz(WINDOW_SIZE);
-//   constexpr std::uint32_t warm_up = QUERY_SIZE / 2;
-//   const std::string data_file = "aol_1m_09_02_2018";
-//   constexpr auto wc_ratio = static_cast<std::uint32_t>(
-//       ceil(WINDOW_SIZE /  static_cast<double>(CACHE_SIZE)));
-//   constexpr std::uint32_t bit_width_tiny =
-//       sizeof(wc_ratio) * 8 - __builtin_clz(wc_ratio - 1);
-//   constexpr std::uint32_t counter_multip = 16;
-
-//   // strawman_hist = new StrawmanHistogram<WINDOW_SIZE, 10, strawman_bit_width>(2);
-//   // lru_cache = new LruCache(CACHE_SIZE);
-//   // lru_cache->SetFrequencyHistogram(strawman_hist);
-//   // ExperimentResult lru_strawman_result = Experiment(queries, lru_cache, warm_up);
-//   // delete strawman_hist;p
-//   // delete lru_cache;
-//   // WriteExperimentResult(lru_strawman_result, data_file, "strawman", "lru");
-
-//   // auto tiny_hist = new TinyLfuHistogram<CACHE_SIZE * counter_multip, bit_width_tiny>(4, WINDOW_SIZE);
-//   // lru_cache = new LruCache(CACHE_SIZE);
-//   // lru_cache->SetFrequencyHistogram(tiny_hist);
-//   // ExperimentResult res = Experiment(queries, lru_cache, warm_up);
-//   // delete tiny_hist;
-//   // delete lru_cache;
-//   // WriteExperimentResult(lru_tiny_result, data_file, "tinyh4", "lru");
-
-//   // tiny_hist = new TinyLfuHistogram<CACHE_SIZE * counter_multip, bit_width_tiny>(5, WINDOW_SIZE);
-//   // lru_cache = new LruCache(CACHE_SIZE);
-//   // lru_cache->SetFrequencyHistogram(tiny_hist);
-//   // res = Experiment(queries, lru_cache, warm_up);
-//   // delete tiny_hist;
-//   // delete lru_cache;
-//   // WriteExperimentResult(lru_tiny_result, data_file, "tinyh5", "lru");
-
-//   // auto lru_cache = new LruCache(CACHE_SIZE);
-//   // ExperimentResult res = Experiment(queries, lru_cache, warm_up);
-//   // delete lru_cache;
-//   // WriteExperimentResult(res, data_file, "none", "lru");
-
-//   // lru_cache = new LruCache(CACHE_SIZE);
-//   // auto pure_hist = new PureLfuHistogram();
-//   // lru_cache->SetFrequencyHistogram(pure_hist);
-//   // res = Experiment(queries, lru_cache, warm_up);
-//   // delete pure_hist;
-//   // delete lru_cache;
-//   // WriteExperimentResult(res, data_file, "pure", "lru");
-
-//   // auto lfu_cache = new LfuCache(CACHE_SIZE);
-//   // res = Experiment(queries, lfu_cache, warm_up);
-//   // delete lfu_cache;
-//   // WriteExperimentResult(res, data_file, "none", "lfu");
-
-//   // lfu_cache = new LfuCache(CACHE_SIZE);
-//   // pure_hist = new PureLfuHistogram();
-//   // lfu_cache->SetFrequencyHistogram(pure_hist);
-//   // res = Experiment(queries, lfu_cache, warm_up);
-//   // delete pure_hist;
-//   // delete lfu_cache;
-//   // WriteExperimentResult(res, data_file, "pure", "lfu");
-
-//   // auto gdsf_cache = new GreedyDualSizeKCache(CACHE_SIZE, 1);
-//   // res = Experiment(queries, gdsf_cache, warm_up);
-//   // delete gdsf_cache;
-//   // WriteExperimentResult(res, data_file, "none", "gdsf1");
-
-//   // gdsf_cache = new GreedyDualSizeKCache(CACHE_SIZE, 1);
-//   // pure_hist = new PureLfuHistogram();
-//   // gdsf_cache->SetFrequencyHistogram(pure_hist);
-//   // res = Experiment(queries, gdsf_cache, warm_up);
-//   // delete pure_hist;
-//   // delete gdsf_cache;
-//   // WriteExperimentResult(res, data_file, "pure", "gdsf1");
-
-//   // gdsf_cache = new GreedyDualSizeKCache(CACHE_SIZE, 2);
-//   // res = Experiment(queries, gdsf_cache, warm_up);
-//   // delete gdsf_cache;
-//   // WriteExperimentResult(res, data_file, "none", "gdsf2");
-
-//   // gdsf_cache = new GreedyDualSizeKCache(CACHE_SIZE, 2);
-//   // pure_hist = new PureLfuHistogram();
-//   // gdsf_cache->SetFrequencyHistogram(pure_hist);
-//   // res = Experiment(queries, gdsf_cache, warm_up);
-//   // delete pure_hist;
-//   // delete gdsf_cache;
-//   // WriteExperimentResult(res, data_file, "pure", "gdsf2");
-
-//   // auto gdsf_cache = new GreedyDualSizeKCache(CACHE_SIZE, 3);
-//   // ExperimentResult res = Experiment(queries, gdsf_cache, warm_up);
-//   // delete gdsf_cache;
-//   // WriteExperimentResult(res, data_file, "none", "gdsf_pr");
-
-//   // gdsf_cache = new GreedyDualSizeKCache(CACHE_SIZE, 3);
-//   // auto tiny_hist = new TinyLfuHistogram<CACHE_SIZE * counter_multip, bit_width_tiny>(5, WINDOW_SIZE);
-//   // gdsf_cache->SetFrequencyHistogram(tiny_hist);
-//   // ExperimentResult res = Experiment(queries, gdsf_cache, warm_up);
-//   // delete tiny_hist;
-//   // delete gdsf_cache;
-//   // WriteExperimentResult(res, data_file, "tiny", "gdsf_pr");
-
-//   // gdsf_cache = new GreedyDualSizeKCache(CACHE_SIZE, 3);
-//   // auto pure_hist = new PureLfuHistogram();
-//   // gdsf_cache->SetFrequencyHistogram(pure_hist);
-//   // res = Experiment(queries, gdsf_cache, warm_up);
-//   // delete pure_hist;
-//   // delete gdsf_cache;
-//   // WriteExperimentResult(res, data_file, "pure", "gdsf_pr");
-
-//   auto lru = new LruCache(CACHE_SIZE);
-//   ExperimentResult res = Experiment(queries, lru, warm_up);
-//   delete lru;
-//   WriteExperimentResult(res, data_file, "none", "lru");
-
-//   auto lfu = new LfuCache(CACHE_SIZE);
-//   res = Experiment(queries, lfu, warm_up);
-//   delete lfu;
-//   WriteExperimentResult(res, data_file, "none", "lfu");
-
-//   return 0;
-// }
+void WindowHistEvEval(const std::vector<std::string>&,
+                      const std::vector<std::string>&,
+                      std::uint32_t, HitrateEvaluation* const,
+                      std::uint32_t, std::uint32_t, std::uint32_t);
 
 int main(int argc, char* argv[]) {
-  struct SomeStrct {
-    std::uint32_t d;
-    SomeStrct(const std::uint32_t& data) : d{data} {}
-  };
+  std::vector<std::string> queries {"a", "b", "c", "c", "a", "a", "c", "d", "a",
+        "b", "b", "d", "a", "a", "b", "a", "a", "c"};
+  // std::ifstream qtrain_file("../resource/aol_big_train_sorted.txt");
 
-  typedef DoublyLinkedList<SomeStrct*> UintList;
-  typedef UintList::Node UintNode;
+  // if (qtrain_file.is_open()) {
+  //   std::string line;
 
-  auto x1 = new UintNode(new SomeStrct(1));
-  auto x2 = new UintNode(new SomeStrct(2));
-  auto x3 = new UintNode(new SomeStrct(3));
-  auto list = new UintList();
+  //   while (getline(qtrain_file, line)) {
+  //     queries.push_back(line);
+  //   }
+  // }
+  // qtrain_file.close();
 
-  list->PushFront(x1);
-  list->PushFront(x2);
-  list->PushBack(x3);
-  list->MoveAfter(x2, x1);
-  list->MoveAfter(x1, x3);
-  // list->MoveToFront(x1);
-  UintNode* crr = list->head_->next;
+  // std::ifstream qtest_file("../resource/aol_big_test_sorted.txt");
 
-  while (crr != list->tail_) {
-    std::cout << std::to_string(crr->content->d) << "\n";
-    crr = crr->next;
+  // if (qtest_file.is_open()) {
+  //   std::string line;
+
+  //   while (getline(qtest_file, line)) {
+  //     queries.push_back(line);
+  //   }
+  // }
+  // qtest_file.close();
+
+  // std::uint32_t unique_size = 6724891;
+
+  // std::uint32_t total_size = queries.size();
+  // std::cout << "Total size " << std::to_string(total_size) << "\n";
+
+  // std::uint32_t train_size =  total_size / 10 * 6;
+  // std::cout << "Train size " << std::to_string(train_size) << "\n";
+
+  // std::uint32_t test_size = total_size - train_size;
+  // std::cout << "Test size " << std::to_string(test_size) << "\n";
+
+  // std::uint32_t warmup = test_size / 10;
+  // std::cout << "Warm-up size " << std::to_string(warmup) << "\n";
+
+  // std::vector<std::string> training_q(queries.begin(),
+  //                                     queries.begin() + train_size);
+  // std::vector<std::string> test_q(queries.begin() + train_size, queries.end());
+
+  auto lru = new LruEviction(3);
+  auto ev = new OnlyEvictionReplacementPolicy(lru, "lru");
+
+  for (auto q : queries) {
+    std::cout << "Incoming " << q << std::endl;
+    bool res = ev->IsExist(q);
+    std::cout << lru->CacheToString() << std::endl << std::endl;
   }
 
+  delete ev;
+  delete lru;
+
   return 0;
+}
+
+void FullHistEvEval(const std::vector<std::string>& train,
+                    const std::vector<std::string>& test,
+                    std::uint32_t warmup, HitrateEvaluation* const eval,
+                    std::uint32_t base_cache_size, std::uint32_t until_multip) {
+
+  std::string name = "pure_lfu_long";
+  for (std::uint32_t i = 1; i <= until_multip; ++i) {
+    auto freq_hist_ev = new PureLfuHistogram();
+
+    std::cout << name << " is training\n";
+    // for (auto trq : train) {
+    //   freq_hist_ev->Add(trq);
+    // }
+
+    std::uint32_t cache_size = base_cache_size * i;
+    auto ev_pol2 = new LfuEviction(cache_size, test.size());
+    ev_pol2->SetFrequencyHistogram(freq_hist_ev);
+    auto lfu_ev = new OnlyEvictionReplacementPolicy(ev_pol2, name);
+    std::vector<ReplacementPolicy*> r {lfu_ev};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
+        "\n";
+    eval->Evaluate(test, r, cache_size, warmup);
+
+    delete freq_hist_ev;
+    delete ev_pol2;
+    delete lfu_ev;
+  }
+}
+
+void FullHistAdmEval(const std::vector<std::string>& train,
+                     const std::vector<std::string>& test,
+                     std::uint32_t warmup, HitrateEvaluation* const eval,
+                     std::uint32_t base_cache_size,
+                     std::uint32_t until_multip) {
+
+  std::string name = "adm_full_hist";
+  for (std::uint32_t i = 1; i <= until_multip; ++i) {
+    auto freq_hist_ev = new PureLfuHistogram();
+
+    std::cout << name << " is training\n";
+    for (auto trq : train) {
+      freq_hist_ev->Add(trq);
+    }
+
+    std::uint32_t cache_size = base_cache_size * i;
+    auto ev_pol2 = new LfuEviction(cache_size, test.size());
+    auto adm_pol = new FrequencyAdmission(freq_hist_ev);
+    auto lfu_adm = new AdmissionReplacementPolicy(ev_pol2, adm_pol, name);
+    std::vector<ReplacementPolicy*> r {lfu_adm};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
+        "\n";
+    eval->Evaluate(test, r, cache_size, warmup);
+
+    delete freq_hist_ev;
+    delete ev_pol2;
+    delete adm_pol;
+    delete lfu_adm;
+  }
+}
+
+void InMemLfuEval(const std::vector<std::string>& test, std::uint32_t warmup,
+                  HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+                  std::uint32_t until_multip) {
+
+  std::string name = "inmem_lfu";
+
+  for (std::uint32_t i = 1; i <= until_multip; ++i) {
+    std::uint32_t cache_size = base_cache_size * i;
+    auto inmem_ev = new InMemoryLfuEviction(cache_size);
+    auto inmem_rep_pol = new OnlyEvictionReplacementPolicy(inmem_ev, name);
+    std::vector<ReplacementPolicy*> r {inmem_rep_pol};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
+        "\n";
+    eval->Evaluate(test, r, cache_size, warmup);
+
+    delete inmem_ev;
+    delete inmem_rep_pol;
+  }
+}
+
+void LruEval(const std::vector<std::string>& test, std::uint32_t warmup,
+             HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+             std::uint32_t until_multip) {
+
+  std::string name = "lru";
+
+  for (std::uint32_t i = 1; i <= until_multip; ++i) {
+    std::uint32_t cache_size = base_cache_size * i;
+    auto lru = new LruEviction(cache_size);
+    auto lru_rep_pol = new OnlyEvictionReplacementPolicy(lru, name);
+    std::vector<ReplacementPolicy*> r {lru_rep_pol};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
+        "\n";
+    eval->Evaluate(test, r, cache_size, warmup);
+
+    delete lru;
+    delete lru_rep_pol;
+  }
+}
+
+void InmemGdsfkEval(const std::vector<std::string>& test, std::uint32_t warmup,
+                    HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+                    std::uint32_t until_multip, std::uint8_t k) {
+
+  std::string name = "inmem_gdsf" + std::to_string(k);
+
+  for (std::uint32_t i = 1; i <= until_multip; ++i) {
+    std::uint32_t cache_size = base_cache_size * i;
+    auto gdsf = new InmemoryGdsfk(cache_size, k);
+    auto gdsf_rep_pol = new OnlyEvictionReplacementPolicy(gdsf, name);
+    std::vector<ReplacementPolicy*> r {gdsf_rep_pol};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
+        "\n";
+    eval->Evaluate(test, r, cache_size, warmup);
+
+    delete gdsf;
+    delete gdsf_rep_pol;
+  }
+}
+
+void GdsfkEval(const std::vector<std::string>& train,
+               const std::vector<std::string>& test, std::uint32_t warmup,
+               HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+               std::uint32_t until_multip, std::uint8_t k) {
+
+  std::string name = "pure_gdsf" + std::to_string(k);
+
+  for (std::uint32_t i = 1; i <= until_multip; ++i) {
+    std::uint32_t cache_size = base_cache_size * i;
+    auto pure = new PureLfuHistogram();
+    for (auto tq: train)
+      pure->Add(tq);
+    auto gdsf = new Gdsfk(cache_size, k);
+    gdsf->SetFrequencyHistogram(pure);
+    auto gdsf_rep_pol = new OnlyEvictionReplacementPolicy(gdsf, name);
+    std::vector<ReplacementPolicy*> r {gdsf_rep_pol};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
+        "\n";
+    eval->Evaluate(test, r, cache_size, warmup);
+
+    delete pure;
+    delete gdsf;
+    delete gdsf_rep_pol;
+  }
+}
+
+void AcEval(std::uint32_t controlled_prop,
+            const std::vector<std::string>& train,
+            const std::vector<std::string>& test,
+            std::uint32_t base_cache_size,
+            std::uint32_t until_multip,
+            std::uint32_t warmup) {
+
+  auto exp = new HitrateEvaluation("Cache Size", ",");
+  std::string prop = std::to_string(controlled_prop);
+
+  for (std::uint32_t i = 0; i < 21; ++i) {
+
+    std::string freq_threshold = std::to_string(i);
+    std::cout << prop << ") Frequency Threshold is " << freq_threshold << "\n";
+
+    for (std::uint32_t j = 1; j <= until_multip; ++j) {
+      std::uint32_t cache_size = base_cache_size * j;
+      std::cout << prop << ") Cache size is " << std::to_string(cache_size) <<
+          "\n";
+
+      std::uint32_t c_size = cache_size / 10 * controlled_prop;
+      std::uint32_t u_size = cache_size - c_size;
+      std::cout << prop << ") Controlled size is " << std::to_string(c_size) <<
+          "\n";
+      std::cout << prop << ") Uncontrolled size is " <<
+          std::to_string(u_size) << "\n";
+
+      auto freq_hist_adm = new PureLfuHistogram();
+
+      for (auto trq : train) {
+        freq_hist_adm->Add(trq);
+      }
+
+      auto controlled = new LruEviction(c_size);
+      auto uncontrolled = new LruEviction(u_size);
+      auto adm = new FrequencyAdmission(freq_hist_adm);
+      auto ac = new AdmissionControlledReplacementPolicy(controlled,
+                                                         uncontrolled, adm,
+                                                         i, "ac_" +
+                                                         freq_threshold);
+
+      std::vector<ReplacementPolicy*> r {ac};
+      exp->Evaluate(test, r, cache_size, warmup);
+
+      delete controlled;
+      delete uncontrolled;
+      delete freq_hist_adm;
+      delete adm;
+      delete ac;
+    }
+  }
+
+  std::string rest_prop = std::to_string(10 - controlled_prop);
+  std::string fname = "aol_full/ac" + prop + "-" + rest_prop + ".csv";
+  exp->Dump(fname);
+  delete exp;
+}
+
+void SdcEval(std::uint32_t static_prop,
+             const std::vector<std::string>& train,
+             const std::vector<std::string>& test,
+             HitrateEvaluation* const eval,
+             std::uint32_t base_cache_size,
+             std::uint32_t until_multip,
+             std::uint32_t warmup) {
+  std::string prop = std::to_string(static_prop);
+
+  for (std::uint32_t i = 1; i <= until_multip; ++i) {
+    std::uint32_t cache_size = base_cache_size * i;
+    std::cout << prop << ") Cache size is " << std::to_string(cache_size) <<
+        "\n";
+
+    std::uint32_t st_size = cache_size / 10 * static_prop;
+    std::uint32_t dyn_size = cache_size - st_size;
+
+    std::cout << prop << ") Static size is " << std::to_string(st_size) <<
+        "\n";
+    std::cout << prop << ") Dynamic size is " <<
+        std::to_string(dyn_size) << "\n";
+
+
+    auto lfu = new LfuEviction(st_size, train.size());
+    auto pure = new PureLfuHistogram();
+    auto gdsfk = new Gdsfk(dyn_size, 3);
+    gdsfk->SetFrequencyHistogram(pure);
+
+    auto sdc = new StaticDynamicReplacementPolicy(train, gdsfk, lfu, pure,
+                                                 "sdc_" +
+                                                 std::to_string(static_prop));
+    std::vector<ReplacementPolicy*> r {sdc};
+    eval->Evaluate(test, r, cache_size, warmup);
+
+    delete lfu;
+    delete pure;
+    delete gdsfk;
+    delete sdc;
+  }
 }

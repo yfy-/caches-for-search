@@ -1,12 +1,10 @@
-//
 // Created by yfy on 10/10/17.
-//
 
-#ifndef CENG778_PROJECT_DOUBLYLINKEDLIST_H
-#define CENG778_PROJECT_DOUBLYLINKEDLIST_H
+#ifndef CENG778PROJECT_DOUBLYLINKEDLIST_H
+#define CENG778PROJECT_DOUBLYLINKEDLIST_H
 
-#include <cstddef>
 #include <string>
+#include <type_traits>
 
 template <class T>
 class DoublyLinkedList {
@@ -18,21 +16,18 @@ class DoublyLinkedList {
     Node* next;
     Node* prev;
 
-    Node() : next{nullptr}, prev{nullptr} {}
-    Node(const T& c) : content{c} { Node(); }
-
-    // Node& operator=(const Node& other) {
-    //   this->next = other.next;
-    //   this->prev = other.prev;
-    // }
+    Node() : next{nullptr}, prev{nullptr}, content{0} {}
+    Node(T c) : next{nullptr}, prev{nullptr}, content{c} {}
   };
 
   Node* head_;
   Node* tail_;
 
   DoublyLinkedList();
-  virtual ~DoublyLinkedList();
+  DoublyLinkedList(DoublyLinkedList<T>&);
+  ~DoublyLinkedList();
 
+  // node has to be connected
   inline void Disconnect(Node* node) {
     node->prev->next = node->next;
     node->next->prev = node->prev;
@@ -40,10 +35,13 @@ class DoublyLinkedList {
 
   void PushFront(Node*);
   void PushBack(Node*);
+  void PushAfter(Node*, Node*);
+  void PushBefore(Node*, Node*);
   void MoveToFront(Node*);
   void MoveToBack(Node*);
   void MoveAfter(Node*, Node*);
   void MoveBefore(Node*, Node*);
+  bool IsEmpty();
 };
 
 template <class T>
@@ -53,6 +51,12 @@ DoublyLinkedList<T>::DoublyLinkedList() {
 
   head_->next = tail_;
   tail_->prev = head_;
+}
+
+template <class T>
+DoublyLinkedList<T>::DoublyLinkedList(DoublyLinkedList<T>& other) {
+  this->head_ = other.head_;
+  this->tail_ = other.tail_;
 }
 
 template <class T>
@@ -72,7 +76,7 @@ void DoublyLinkedList<T>::PushBack(Node* node) {
 }
 
 template <class T>
-DoublyLinkedList<T>::~DoublyLinkedList<T>() {
+DoublyLinkedList<T>::~DoublyLinkedList() {
   Node* curr = head_->next;
 
   while (curr != nullptr) {
@@ -102,11 +106,7 @@ void DoublyLinkedList<T>::MoveToBack(Node* node) {
 }
 
 template <class T>
-void DoublyLinkedList<T>::MoveAfter(Node* node, Node* target) {
-  if (target->next == node)
-    return;
-
-  Disconnect(node);
+void DoublyLinkedList<T>::PushAfter(Node* node, Node* target) {
   target->next->prev = node;
   node->next = target->next;
   target->next = node;
@@ -114,15 +114,34 @@ void DoublyLinkedList<T>::MoveAfter(Node* node, Node* target) {
 }
 
 template <class T>
-void DoublyLinkedList<T>::MoveBefore(Node* node, Node* target) {
-  if (*target->prev == *node)
-    return;
-
-  Disconnect(node);
+void DoublyLinkedList<T>::PushBefore(Node* node, Node* target) {
   target->prev->next = node;
   node->prev = target->prev;
   target->prev = node;
   node->next = target;
 }
 
-#endif //CENG778_PROJECT_DOUBLYLINKEDLIST_H
+template <class T>
+void DoublyLinkedList<T>::MoveAfter(Node* node, Node* target) {
+  if (target->next == node)
+    return;
+
+  Disconnect(node);
+  PushAfter(node, target);
+}
+
+template <class T>
+void DoublyLinkedList<T>::MoveBefore(Node* node, Node* target) {
+  if (target->prev == node)
+    return;
+
+  Disconnect(node);
+  PushBefore(node, target);
+}
+
+template <class T>
+bool DoublyLinkedList<T>::IsEmpty() {
+  return head_->next == tail_;
+}
+
+#endif // CENG778PROJECT_DOUBLYLINKEDLIST_H

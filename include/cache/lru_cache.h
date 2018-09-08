@@ -13,7 +13,6 @@ class LruCache : public Cache {
  public:
   LruCache(uint32_t s);
   bool IsExist(const std::string&) override;
-  inline void SetFrequencyHistogram(FrequencyHistogram* fh) { freq_hist_ = fh; }
   std::string ToString() const override;
   virtual ~LruCache();
 

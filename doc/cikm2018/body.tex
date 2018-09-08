@@ -1,0 +1,824 @@
+\section{Introduction}
+Large-scale search engines extensively employ caching to store
+pre-fetched and/or pre-computed data items, such as query result
+pages, postings lists and their intersections, documents, etc., in the
+main memory. Research on caching addresses various questions each
+yielding alternative policies, such as which items should be accepted
+into the cache (admission), which item should be removed from the
+cache when it is full (eviction), whether an item should be cached
+even before requested (prefetching) and when the data item in cache
+should be re-fetched or -computed (refreshing) [barla, fabrizio].
+
+As in many other domains, frequency and recency of past data items
+(or, requests) are again strong signals to decide on the items to be
+evicted from the query result caches of search engines. While these
+two signals are used on their own in the well-known eviction policies
+Least Frequently Used (LFU) and Least Recently Used (LRU),
+respectively; they are also combined for tailoring more effective
+policies, as in the GDSF policy.
+
+In this paper, our contributions are two-fold: First, we investigate
+the impact of storing a large query frequency history versus just
+keeping the frequency of the queries that are in the cache. We show
+that keeping the entire history (i.e., frequency of all seen queries
+by the search engine) may improve the cache performance (i.e., hit
+ratios) for various policies that employ frequency as a signal for
+eviction. Secondly, we adopt a recently proposed storage scheme for
+exactly this purpose, i.e., storing past request frequencies in a
+compact manner for caching, to our application domain. The latter
+scheme, referred to as Tiny here, stores the query frequency history
+in a more compact way by using both Simple and Counting Bloom Filters
+[]. Our experiments reveal that the storage space for query history
+can be significantly reduced while cache performance still remains
+comparable to storing the entire query history.
+
+The savings from memory space usage are important and meaningful in
+practice because: 1) As the number of queries submitted to search
+engines has reached to very large numbers (e.g., Google receives XX
+queries per day), storing an entire history (or, a truncated version
+restricted for a month or even a week) may have very demanding memory
+storage requirements. 2) As recent works have shown, it is possible
+store query results in alternative formats, such as the top-k results'
+URLs and snippets vs. just document identifiers [], and in the latter
+case, much larger number of query results can be cached in the same
+amount of memory space, making even a small saving in the memory space
+valuable. Therefore, we believe that our findings showing the
+importance of keeping the full query history and its achievability
+using compact storage schemes is a valuable contribution. Note that,
+while our current evaluation only considers traditional result caches
+(storing results' with URLs, snippets, etc.), we believe that Tiny
+storage scheme would also be a perfect fit to be used with hybrid
+result caches (that also has a segment storing some results as
+documents IDs), and we leave evaluating such an architecture as a
+future work.
+
+% NOT: Tiny'nin zatenbu amacla propose edildigi belli olmali.
+In the following section, we first review the Counting Bloom Filters
+and then present the Tiny storage scheme as proposed
+in~\cite{einziger2014tinylfu} to be used for storing the query
+frequency history. In Section 3, we describe our simulation framework
+and in Section 4, we present our results using various well-known
+cache eviction policies. We review earleir works in Section 5 and
+provide concluding discussions in Section 6.
+
+
+% Recent work on query result caching has shown that admission
+% policies for such a cache may be useful, especially when the cache
+% is segmented [] and/or results are stored in alternative formats
+% (such as the top-k results' URLs and snippets vs. just document
+% identifiers) []. In this paper, we adapt an existing admission
+% policy, so-called TinyLFU [], to the result caching for search
+% engines. TinyLFU decides on the query results to be cached using the
+% frequency information of a large number of previous queries. While
+% doing so, it employs a compact storage scheme with Counting Bloom
+% Filters (CBF) to store past query frequencies. Our evaluation in
+% this paper shows that TinyLFU admission policy coupled with various
+% eviction schemes improve cache hit ratios. Furthermore, the
+% additional space overhead for storing the metadata (i.e., past query
+% frequencies) is considerably low (in comparison to a plain storage
+% of frequencies) due to the use of CBFs.
+
+% Our findings are important because: (i) they verify the previous
+% work [] in that frequency-based admission policies are useful for
+% caching in web search where query stream exhibits a power-law
+% distribution, and (ii) they show that improvements in hit ratios are
+% achievable using only a small storage space (i.e., a tiny fraction
+% of available cache space) for admission policy metadata. This makes
+% tinyLFU a perfect candidate to be used with result cache types where
+% the space trade-off for the cache content vs. admission metadata is
+% strict (such as a result cache that stores only docIDs as query
+% results --as in []), and hence, opens a direction for devising new
+% hybrid caches for search engines. While this paper presents the
+% preliminary results demonstrating the benefits of using TinyLFU with
+% a traditional result cache (i.e., storing the URL and snippet for
+% top-10 results of a query) while our work in the latter direction
+% (with a docID cache) is in progress.
+
+% In the following section, we first review the Counting Bloom Filters
+% to be used for storing the frequencies for a large query sample. In
+% Section 3, we describe TinyLFU admission policy together with its
+% metadata storage scheme, as proposed
+% in~\cite{einziger2014tinylfu}. In Section 4, we first describe the
+% eviction strategies that are applied for the result cache together
+% with TinyLFU, and then provide details for the simulation setup. We
+% report our simulation results in Section 5 and provide concluding
+% discussions in Section 6.
+
+% Caching tecniques are solutions that generally considered first at
+% hand to boost performance of applications, especially on web. It is
+% the process of keeping the items that are more likely to appear in
+% the future at a faster or a closer store so that these items can be
+% served within shorter times. Hence, accomodating a cache for a
+% system can marginally increase the average system throughput of
+% response with reasonably small costs. Concretely, as the number of
+% items served from the cache increases, the system performance will
+% also increase.
+
+\begin{comment}
+Whenever an item is served from the cache, we call it a cache
+\textit{hit} and the opposite is called a cache
+\textit{miss}. Consequently, a common metric that is used to evaluate
+cache performance is the \textit{hit-rate}. It is the ratio of the
+cache hits and total number of items served from the
+system. Therefore, caching algorithms yielding a higher hit-rate is
+preferable over others. If a caching technique can predict future
+items and admit them into the cache, it is expect to obtain higher
+hit-rates.
+
+$$\mathrm{Hit\ Rate} = \frac{hit}{hit + miss}$$
+
+
+Various caching methods predict future items by using statistics from
+the past access patterns. Such well known ones are \textit{Least
+  Recently Used LRU} and \textit{Least Frequently Used LFU} cache
+eviction policies. As their name implies, if the storage for the cache
+is full, at each access request for an item, the former evicts the
+least recently accessed item and admits the recently requested one,
+whereas the latter evicts the least frequent item. In chapter 2 we
+give a detailed information of cache eviction and admission
+policies. It is an important caveat to acknowledge for cache eviction
+or admission policies that the overhead of making decisions about
+which item to evict or admit should not overcome the benefit of
+caching. In other words, using a cache should not be more expensive
+than using none at all in terms of time complexity.
+
+Cache admission or eviction policies usually require additional data
+structures to be used in order to keep statistical data about past
+access patterns. The storage used by these data structures are called
+the meta-data of the cache. As in time complexity, the storage cost of
+meta-data of the cache should not surpass the cost of the actual
+cache. Otherwise, the most amount of space is kept for the meta-data
+rather than the cache itself. Hence, large meta-data cost can enforce
+the cache to only store a few items. Moreover, it is important to note
+that cache size $\mathcal{C}$ has the largest impact on
+hit-rate. Therefore, it is crucial to keep meta-data storage cost to a
+minimum so that we can have a larger $\mathcal{C}.$
+
+An example of a cache meta-data can be a frequency
+histogram. \textit{LFU} eviction policy requires to have the knowledge
+of frequency of the items in order to be able to decide on which item
+to evict. If the frequencies are kept for all items throughout the
+whole data access stream then it is called the \textit{Pure LFU
+  (P-LFU)}.  However, achieving a such frequency histogram for all
+items brings a blast on the meta-data size. Therefore, \textit{P-LFU}
+is not applicable for majority of applications even tough it is shown
+that it yields the optimal hit-rate for large enough caches
+\cite{breslau1999web}.  On the contrary, \textit{LRU} does not require any
+additional meta-data cost, since the cache only needs to know about
+the order of accesses of items in the cache which can be efficiently
+implemented using a linked list. However, \textit{LRU} only yields
+competent hit-rates if the cache is large, as also what we've obtained
+from our results experimentally.
+
+Karakostas et al. \cite{karakostas2002exploitation} have offered the
+usage of \textit{Window-LFU (W-LFU)} where they've shown that for Zipf
+or Zipf-like distributions, keeping the frequency statistics of last
+accessed $|W|$ items can approximate to \textit{P-LFU}. Therefore, the
+meta-data storage cost can be reduced marginally compared to
+\textit{P-LFU}. In Zipf distribution, few items are accessed very
+frequently, whereas most of the items are accessed a couple of times
+or even singletons. Zipf or Zipf-like distributions are common in
+various domains of computer science as well as web search. Formally,
+the probability of observing an item with rank $i$ is given as with
+parameter $\alpha$;
+
+$$
+Pr\{i\} = \frac{1}{\mathrm{H}_{N, \alpha}i^\alpha}
+$$
+
+where $\mathrm{H}_{N, \alpha }$ is the $\mathrm{N}$th harmonic number.
+
+Moreover, \textit{W-LFU} better adapts to changes in the access
+pattern by forgetting old events. However, implementing \textit{W-LFU}
+can still be costly, since the order of the last $|W|$ accesses have
+to be known so that when $W + 1$th access occurs the least recent
+access can be forgotten (decrementing its frequency).
+
+In order to further reduce the meta-data cost of \textit{W-LFU},
+Eingizer et al. \cite{einziger2014tinylfu} offers a highly efficient
+cache admission policy \textit{Tiny LFU} that yields the best
+performance when augmented with an \textit{LFU} eviction
+policy. \textit{Tiny LFU} accurately approximates to \textit{W-LFU} by
+exploiting the fact that data access stream has the properties of
+Zipf-like distribution and the frequency counting can be effectively
+approximated with the help of \textit{Bloom
+  Filter}\cite{bloom1970space} theory and approximation
+sketches. \textit{Tiny LFU} admission policy achieves a good
+compromise between changes in distribution and as an approximation
+of a frequency histogram. However, the proposed method of augmenting
+\textit{Tiny LFU} with an \textit{LFU} eviction policy may stutter
+in terms of hit-rate when distribution changes happen frequently.
+This is due to \textit{LFU} eviction policy cannot adapt to
+changes in distribution well enough.
+
+This paper contributes the following; we offer an explanation of cache
+admission and eviction policies and give a general notion
+algorithm. We offer an implementation of \textit{Tiny LFU} and augment
+it with various cache eviction policies as well as compare it to
+\textit{Sliding Window}\cite{dimitropoulos2008eternal} approach.
+Lastly we show that \textit{Tiny LFU} can perform better when
+augmented with an adaptation of \textit{Greedy Dual Size Frequency}
+cache eviction policy.
+
+Section \ref{admission} describes the distinction between admission
+and eviction policies and gives an algorithm to generalize their
+usage. Section \ref{primer} briefly introduces \textit{Bloom Filters}
+and approximation sketches. \textit{Tiny LFU} and \textit{Sliding
+  window} are discussed and compared in Section \ref{tiny}. Our
+experimental setup and \textit{Tiny LFU} customization is explained in
+Section \ref{experiment} as well as approximate storage sizes of cache
+admission and eviction policies under discussion.  Section \ref{res}
+presents our results on AOL query log dataset and finally Section
+\ref{conc} concludes this paper.
+
+\end{comment}
+
+\section{Counting Bloom Filters (CBF) for Storing Past Query Frequencies}\label{primer}
+
+\begin{figure}
+\includegraphics[scale=0.3]{bloom_filter}
+\caption{A simple Bloom Filter with $m$ bits and 3 hash functions
+  where $k$ is the key being hashed.}
+\label{fig:bf}
+\end{figure}
+
+Bloom filters allow to efficiently query the existence of an item
+$a_i$ in a set $A = \{a_1, a_2 \cdots a_n\}$ of $n$ elements. As shown
+in Figure \ref{fig:bf}, a Bloom filter allocates a vector of $m$ bits
+that are initially set to 0. When an item $a_i$ from set $A$ is
+inserted, $k$ distinct hash functions are applied to $a_i$ to obtain
+the values $h_1(a_i), h_2(a_i), \cdots, h_k(a_i)$ each within the
+range $\left[0, m\right]$, and bits at these positions are set to 1.
+Consequently, when an item $a_i$ is queried to check whether it is in
+the set $A$ or not, bits at positions
+$h_1(a_i), h_2(a_i), \cdots, h_k(a_i)$ are read, and if any of them is
+set to 0 then $a_i$ has not seen before for sure. Otherwise, we
+conclude that the item should be in the set, although there is a
+probability of being wrong. Fortunately, Fan et
+al.~\cite{fan2000summary} show that the probability of obtaining a
+false positive is low; for instance, it is only 0.9\% if $m$ is an
+order of magnitude larger than $n$ and five hash functions are
+employed.
+
+%given
+%approximately as at \cite{fan2000summary};\newline
+%$$
+%\left( 1 - e^{-kn/m}\right)^k
+%$$
+
+%\subsection{Counting bloom Filters}
+In order to use Bloom filters to keep track of the counts, say, to
+represent the frequency history of a query stream, it is adequate to
+allocate a vector of $m$ counters rather than that of $m$ bits. In
+their work~\cite{einziger2014tinylfu}, Einziger et al. employ a
+Minimal Increment CBF to store the approximate frequency values of
+previous queries. The Estimate operation is used to obtain the
+approximate frequency of a given query, which is the minimum count
+among the values at the indexes computed by k different hash
+functions. Similarly, the Add operation computes k different hash
+values for a given query and increments only the minimal counters at
+corresponding positions.
+
+% Therefore, rather than querying the previous occurrence of an item,
+% the frequency of the item can be approximated. There are numerous
+% implementation of sketches such as \textit{Count-min sketch}
+% \cite{cormode2005improved} and \textit{Spectral Bloom Filters}
+% \cite{cohen2003spectral} where we focus on \textit{Spectral Bloom
+% Filters} with a simpler counting scheme as \textit{Counting Bloom
+% Filter} \cite{fan2000summary} and \textit{Minimal Increment}
+% \cite{cohen2003spectral} operation as in \cite{einziger2014tinylfu}.
+
+\begin{comment}
+  \subsubsection{Spectral Bloom Filter.} Basically an \textit{SBF
+    (Spectral Bloom Filter)} has $m$ counters and $k$ hash functions
+  as in bloom filters. Additionally it has two operations namely
+  \textit{Add} and \textit{Estimate} where the \textit{Add} operation
+  is used when a new item is accessed and its frequency should be
+  incremented.\textit{Estimate} is used toobtain frequency
+  approximation of an item. \textit{Estimate} works as follows, after
+  obtaining $k$ values at indexes by applying $k$ hash functions, only
+  the minimum value is returned. Assume with 4 hash functions we
+  obtain values $\{3,3,4,5\}$ thus the result will be
+  $3$. \textit{Add} operation works in a similar way with so called
+  \textit{Minimal Increment} method. Considering the same example only
+  the two values of $3$'s would be incremented. All the logic behind
+  using the minimum elements is that for other elements it is for sure
+  that a collision happened. Therefore, \textit{SBF} tries to minimize
+  the error by manipulating minimum elements.
+
+\subsubsection{Saturation of Approximation Sketches.}
+As already mentioned, in a Zipf distribution most of the items are
+singletons i.e. occurring a single time throughout the most recent
+accesses of length $W$. Due to large number of singleton items, an
+approximation sketch may result in many hash collisions in a brief
+time, thus resulting in poor frequency approximation for the rest of
+the data stream. In such cases, it is called that the sketch is
+saturated \cite{dimitropoulos2008eternal}. Therefore, to achieve
+accurate approximations, admission policies that make use of
+approximation sketches should deal with the saturation problem,
+especially on Zipf-like distributions.
+\end{comment}
+
+\begin{itemize}
+\item \textit{Pure:} In this approach, the query string and its
+  frequency is plainly stored for each query seen in the stream,
+  regardless of the queries are cached, or not.
+
+%We should probably remove sliding window since we do not have the
+%result with the long query log. However we might mention it briefly
+%and explain that Tiny gave better hit ratios and is much smaller in size.%
+\item \textit{Sliding Window (SW):} As the Pure strategy may waste a
+  large storage space, earlier works
+  (e.g.,~\cite{karakostas2002exploitation}) proposed to only store the
+  frequency of last W queries. A further improvement over this
+  approach is rather than keeping exact frequencies, again storing the
+  approximate values using sketches that are similar to CBFs
+  [citation?]. In~\cite{einziger2014tinylfu}, a baseline method, SW,
+  is designed based on the latter work, as follows.
+
+  SW approach keeps $l$ identical counting sketches, so-called
+  segments, in a FIFO queue. At each request, i.e., query, only the
+  sketch at the front is manipulated until $\frac{W}{l}$ times of
+  queries are observed. Afterwards, the front sketch is inserted at
+  the tail of the queue and a new sketch is fetched and all of its
+  counters are set to 0. By doing so, the frequency of the least
+  recently accessed $\frac{W}{l}$ items are
+  forgotten. %Notice that this method allows the sketch to avoid early saturation, also a sliding window is obtained with the step size of $\frac{W}{l}$.
+  Note that, to estimate the frequency a query, $l$ distinct sketches
+  should be accessed to sum their frequency estimations.
+
+In terms of the storage requirements, each counter at a segment can be capped to $\log
+\frac{W}{l}$ since it is the maximum number of times that a query can
+occur. Thus, the total required number
+of bits for the \textit{Sliding Window} approach is as in Equation
+\ref{eq:straw} where $d$ is the number of counters per segment;
+
+\begin{equation}
+  \label{eq:straw}
+n \times l \times log_2\left(\frac{W}{l}\right)
+\end{equation}
+
+\item \textit{Tiny:} Different from the previous approach,
+  \textit{Tiny} contains a single CBF and a simple bloom filter that
+  is called the \textit{doorkeeper}. The latter is intended to reduce
+  the size of the counters in the CBF: As query streams are known to
+  include a large percentage (i.e., up to 44\% []) of singleton
+  queries that appear only once, when a query arrives, first the
+  doorkeeper is checked to see whether it has been seen before, and
+  only for such queries the counters in CBF are increased. Thus, the
+  doorkeeper brings two benefits: Firstly, it slows down the
+  saturation of the CBF as there would be less collisions. Secondly,
+  since singleton queries are not represented via full counters of
+  CBF, the number and/or size of such counters can be smaller.
+
+\begin{comment}
+  Usage of an additional \textit{doorkeeper} might be seen as a
+  storage overhead but its existence allows the \textit{CBF} to have
+  less counters. For an accessed item, \textit{Tiny LFU} first checks
+  its bits in the doorkeeper, and only further increases the full
+  counters if the item already exists in the doorkeeper. This way,
+  singleton items are not reserved full counters in the
+  \textit{SBF}. This brings 2 benefits, firstly it slows down or
+  avoids the saturation of the CBF as there would be less
+  collisions. Secondly, since singleton queries are not represented
+  via full counters of CBF, the number and/or size of the counters can
+  be smaller.
+\end{comment}
+
+Sharing the same motivation with the previous sliding window approach,
+Tiny employs a mechanism to keep the frequency values fresh; i.e., to
+reset the counters at certain time points. To this end, it keeps a
+window counter, starting from $0$, that is incremented after each
+query. Whenever the window counter is equal to $W$, all of the
+counters in the CBF as well as the window counter are divided by 2 and
+the bits in the \textit{doorkeeper} are all set to $0$. Notice that
+this operation can be implemented efficiently by right shifting the
+bits of the counters by 1. More details and the justification of this
+reset method are presented in~\cite{einziger2014tinylfu}.
+
+Obviously, the most important promise of Tiny approach is its storage
+optimization. Einziger et al.~\cite{einziger2014tinylfu} argue that
+for a cache of size $C$, an entry should reside in the cache if it has
+a larger frequency than $1 / C$. Therefore, for a window size of $W$
+queries, each counter can be capped to $log_2 \frac{W}{C}$
+bits. Although we consider this choice a greatly simplifying
+heuristic, experiments in their work as well as ours reported in
+Section 6 show that it works good in practice.
+
+% Of course, this prevents keeping the actual frequency values of the
+% queries in the cache, yet it is assumed to be adequate for a
+% comparison to a new query.  since it already deserves to be in cache
+% when its frequency hit $\frac{W}{C}$ i.e. there is no need to
+% further increment its counters. For instance, if $W / C = 7$ then
+% only 3 bits counters are sufficient.
+
+Note that, since the doorkeeper can count up to 1, full counters are
+only necessary to count up to $\frac{W}{C} - 1$. Therefore, when
+estimating a frequency, estimation from the doorkeeper and CBF are
+summed. Assuming that a doorkeeper has $d$ bits, and the number of
+full counters in CBF is $n$ (typically, $n < d$), the total number of
+bits required to allocate for \textit{Tiny} is given in the following
+Equation \ref{eq:tiny}:
+
+ \begin{equation}
+   \label{eq:tiny}
+d + n \times log_2 \left(\frac{W}{C} - 1\right)
+\end{equation}
+
+
+\end{itemize}
+
+\begin{comment}
+\section{TinyLFU for Cache Admission}\label{admission}
+TinyLFU~\cite{einziger2014tinylfu} is a recently proposed admission
+policy using the approximate frequency values of the query stream. The
+admission logic is coupled with the eviction policy of the cache,
+which can be a traditional strategy like \textit{Least Frequently Used
+  (LFU)} or \textit{Least Recently Used (LRU)}. As shown in Algortihm
+1, the cache accepts all the new entries (query results) as long as
+there is free space. When the cache is full and there is a new entry
+to be inserted, the eviction policy determines the victim entry to be
+replaced. Then, the new entry is allowed to replace the victim only if
+the former's frequency is greater than or equal to that of the
+victim. Note that the new entry is allowed even in the case of
+equality of frequencies, to favor the more recent entries.
+
+To make such a comparison of frequency values possible, it is
+necessary to store the frequencies of the past queries that are not
+currently in the cache. To this end, Eingizer et
+al.~\cite{einziger2014tinylfu} describe two existing storage
+approaches, and propose a third one that actually led to the name
+\textit{TinyLFU} for their policy. We briefly review these approaches
+as follows:
+
+
+
+\begin{algorithm}[!t]
+  \caption{Frequency-based admission policy.}
+  \label{alg:request}
+  \begin{algorithmic}[1]
+    \If{$q$ is in cache}
+    \State $\Call{UpdateFreq}{q}$
+    \Else
+    \If{Cache is not full}
+    \State Admit $q$ in cache
+		\State $\Call{UpdateFreq}{q}$
+    \Else
+    \State $victim \gets \Call{GetVictim}$
+    \If{$\Call{GetFreq}{q} \geq \Call{GetFreq}{victim}$}
+    \State Evict $victim$, admit $q$
+    \EndIf
+    \EndIf
+    \EndIf
+  \end{algorithmic}
+\end{algorithm}
+
+In general cache eviction policy chooses a cache victim when a new
+access for an item occurs (when the cache is full). For instance, this
+decision can be based on \textit{LRU} or \textit{LFU} as already
+discussed earlier. When used without an augmented admission policy,
+the cache victim is always evicted and newly requested item is always
+admitted. Conversely, the the newly requested item is only admitted to
+the cache if its more popular than cache victim according to the
+admission policy.  Algorithm \ref{alg:request} presents a generalized
+method that uses a frequency based admission policy. In line 2 the
+admission policy updates the given item's frequency and returns
+it. Notice that on line 13 the ties are broken in favor of the recent
+item.
+\end{comment}
+
+\section{Experimental Setup}\label{experiment}
+
+\subsection{Query log and simulation parameters} As the query stream,
+we use the queries from the AOL query log [Pass et al. 2006] which
+consists of $\approx17$ million queries. A query on average is $16.5$
+characters. We separate the full log into two splits and use the first
+one as a training set which contains $\approx10$ million queries. The
+rest of the query log is used as a test set in which we use $\%10$
+percent of it to warm-up our cache and we evaluate the hit-rate with
+the rest of the test set.
+
+The training set is used only to keep and accumulate query frequencies
+and does not effect the state of the cache. For the experiments
+performed with LRU eviction policy; we simply discard the training set
+since we do not need to keep any history for LRU and the state of the
+cache only depends on the last accessed $\mathcal{C}$ queries where
+$\mathcal{C}$ is the size of the cache. Table \ref{tab:param}
+summarizes our experimental setup parameters.
+
+\begin{table}
+  \caption{Table of Parameters}
+  \label{tab:param}
+  \begin{tabular}{| l | r |}
+    \hline
+    Parameter & Value \\ \hline
+    Average size of a query ($AvgQ$) & $16.5$ bytes \\ \hline
+    Size of a pointer ($P$) & $4$ bytes \\ \hline
+    Size of an 32-bit integer ($I$) & $4$ bytes \\ \hline
+    Number of distinct queries ($U$) & $\approx6.7$ millions \\ \hline
+  \end{tabular}
+\end{table}
+
+
+% For each eviction policy, we augment the cache with the
+% frequency-based admission strategy where the frequency metadata is
+% stored using one of the approaches Pure, Sliding window (SW) or Tiny
+% (Note that the admission policy together with Tiny storage scheme is
+% referred to as TinyLFU for terminological consistency
+% with~\cite{einziger2014tinylfu}). For each combination of the
+% admission and eviction polciies, in addition to hit ratio, we also
+% report the storage space (denoted with $M$) used by the frequency
+% history needed by the admission policy. For Sliding window (SW) and
+% Tiny approaches, we experiment with different window sizes and report
+% the results for the best performing case. Finally, for each eviction
+% strategy, we also report the baseline performance that does not employ
+% the cache admission policy. Since there is no metadata storage or
+% other parameters, we report only the hit ratio for the latter case.
+
+\subsection{Results}
+In the following subsections we first briefly describe single signal
+caching algorithms and the effect of keeping full query frequency
+history on the hit-rate. These algorithms are \textit{single signal}
+in the sense that they are driven either by the frequency or the
+recency of the queries. Following that, we elaborate on the additional
+space requirements of keeping frequency history and show the benefits
+of keeping them compactly.
+
+Conversely, caching algorithms that do take both frequency and receny
+into account are called \textit{multi signal} and not surprisingly,
+they yield better hit-ratios compared to single ones. We show that
+these algorithms can also benefit from the usage of frequency history
+with an accountable space overhead.
+
+\subsection{Single Signal Caching}
+Below we describe two well known caching algorithms and their
+implementations in our setup. Table 2 shows the worst-case space
+requirements according to our implementations.
+
+\begin{table}
+  \caption{Memory requirement of single signal caching algorithms in
+    bytes where $\mathcal{C}$ is the size of the cache.}
+
+  \label{tab:mem_single}
+  \begin{tabular}{| l | l | r |}
+    \hline
+    Algorithm & Memory Cost & Formula (bytes)\\ \hline
+    LRU & $M_{lru}$ &$\mathcal{C} \times \left( AvgQ + 3P \right)$ \\ \hline
+    In-memory LFU & $M_{lfu}^{inmem}$ & $\mathcal{C} \times \left(
+                                        AvgQ + 6P + I \right)$ \\ \hline
+    Pure LFU & $M_{lfu}^{pure}$ & $M_{lfu}^{inmem} + U \times \left(AvgQ + I\right)$ \\ \hline
+  \end{tabular}
+\end{table}
+
+
+\begin{itemize}
+\item \textit{Least Recently Used (LRU)} always evicts the least
+  recently accessed item if the cache is full. A doubly-linked list
+  can be used to keep the access order of queries and a hash-table
+  that maps the query strings into pointers to linked-list nodes is
+  sufficient enough to apply any operation at $O\left( 1 \right)$ time.
+
+\item \textit{Least Frequently Used (LFU)} always evicts the least
+  frequent item if the cache is full. The variant that does not keep
+  any history and accumulates the frequency of items for only the
+  cached ones is called the \textit{In-memory LFU}. In contrast to the
+  LRU, a doubly-linked list with special frequency nodes is required
+  [Shah et al.] for an efficient implementation. At worst-case, number
+  of frequency nodes are as many as the cached items i.e. each
+  frequency node contains a single cached item. Other LFU variant that
+  keeps the full frequency history of queries without any
+  approximation is called the Pure LFU. It requires an additional
+  hash-table that maps query strings into frequency values.
+
+\end{itemize}
+
+\begin{figure}
+  \caption{Hit-ratios of single signal caching algorithms}
+  \includegraphics[scale=0.5]{single_signal.png}
+\end{figure}
+Figure 1 shows hit-ratio's of single signal caching algorithms with
+respect to the cache size. Pure LFU marginally improves the hit-ratio
+compared to Inmemory LFU and LRU, especially for small cache
+sizes. Since the counters of the Inmemory LFU reside in the frequency
+nodes, number of counters increase proportional to the cache
+size. Hence, the improvement of Inmemory LFU over LRU becomes more
+significant as the cache size gets larger.
+
+%We can remove this
+Some of the earlier works [gan and suel] have shown opposite results to ours
+in which the LRU offers better hit-ratios than the Inmemory LFU on the
+same dataset. We've observed that Inmemory LFU is fragile to the
+changes in frequency distribution over long query streams. Since our
+cache warm-up (around 700k) is much shorter relative to [gan and suel]
+(around 5m), Inmemory LFU performs better. When we increased our cache
+warm-up to also include the training set (around 10m) the hit-ratio
+dropped significantly and we achieved similar results to [gan and
+suel].
+
+We present the results 
+
+\begin{table*}
+  \caption{Comparison of single signal caching algorithms where
+    $\mathcal{C}$ is the cache size, $\mathcal{M}$ is the memory size
+    in kilobytes, $\mathcal{R}$ is the ratio of memory size to result
+    cache, $\mathcal{H}$ is the hit-ratio, $\mathcal{W}$ is the window
+    size for Tiny in millions, and $\mathcal{B}_w$ is the bit-width of
+    a single full counter for Tiny.}
+  \label{tab:single}
+\begin{tabular}{|c | r | r | r | r | r | r | r | r | r | r | r | r |}
+\hline
+\multirow{2}{*}{$\mathcal{C}$} &\multicolumn{2}{c|}{\textbf{LRU}} &
+\multicolumn{2}{c |}{\textbf{Inmemory LFU}} &
+\multicolumn{3}{c |}{\textbf{Pure LFU}} & \multicolumn{5}{c |}{\textbf{Tiny LFU}} \\
+\cline{2-13}
+& $\mathcal{M}$ & $\mathcal{R}$ & $\mathcal{M}$ &
+$\mathcal{R}$ & $\mathcal{H}$ & $\mathcal{M}$ & $\mathcal{R}$ &
+ $\mathcal{H}$ & $\mathcal{M}$ & $\mathcal{R}$ &$\mathcal{W}$ &$\mathcal{B}_{w}$ \\
+  \hline
+  $100k$ & 2784 & & 4346 & & $0.436$ & 138976 & & $0.437$ & 37305 & &
+                                                              10 & 7\\ \hline
+  $200k$ & 5567 & & 8692 & & $0.479$ & 143332 &  & $0.479$ & 37989 & &
+                                                              10 & 6\\ \hline
+  $300k$ & 8350 & & 13038 & & $0.502$ & 147668 & & $0.501$ & 59913 & &
+                                                              16 & 6\\ \hline
+  $400k$ & 11133 & & 17383 & & $0.516$ & 152013 & & $0.516$ & 64258 &
+                                              & 16 & 6\\ \hline
+  $500k$ & 13917 & & 21729 & & $0.527$ & 156359 & & $0.526$ & 62745 &
+                                              & 16 & 5\\ \hline
+\end{tabular}
+\end{table*}
+
+
+\subsection{Multi-Signal Caching}
+
+\begin{itemize}
+  \item \textit{Greedy Dual Size Frequency-K (GDSF-K):} Greedy Dual Size Frequency is proposed by \cite{arlitt2000evaluating}
+that can offer a good compromise between recency and frequency that is
+also cost aware. However, for our concerns the cost awareness is
+ignored. Victim suggested is the item that has the lowest
+          $\mathcal{H}_{value}$ which is given in \ref{eq:1}.  $\mathcal{F}_i$
+is the frequency of the item, $\mathcal{C}_i$ and $\mathcal{S}_i$ are
+cost and size of page of item respectively (equal to 1). Lastly,
+$\mathcal{L}$ is the aging factor that is updated to the
+$\mathcal{H}_{value}$ of the cache victim whenever it is evicted. This
+way, newly admitted items will obtain a higher
+$\mathcal{H}_{value}$. Therefore, items that are less recently
+accessed has a higher chance of being the victim.
+\end{itemize}
+
+\section{Results}\label{res}
+In Table 1, we report the performance for incorporating the
+frequency-based admission policy of TinyLFU into a cache using LRU as
+the eviction policy. Our experiments show that admission policy with
+the frequency history of entire query stream (i.e., Pure) yields the
+highest improvement in hit ratio for small caches of up to
+C=10\%. When usign the approximate frequencies (provided by Sliding
+Window or Tiny) with the admission policy, the hit ratio still
+improves with respect to the None case, but not as high as in the case
+of Pure. However, the space usage for the Pure case is very high,
+11,264 KB, regardless of the cache size. In contrary, Sliding Window
+and Tiny achieves gains by using very small storage space; the largest
+values in Table 1 being 2,639 KB and 495 KB, respectively. These
+findings show that Tiny yields hit-ratios as high as Slding Window and
+close to Pure, but employs a significantly smaller storage space.
+
+In Table 2, we report the results when the cache eviction policy is
+LFU. As cache admission and eviction polices match better, the
+performance gains of using them together is even larger. Again, Tiny
+outperforms Sliding Window for all cache sizes with space usage of
+only about 20\% of the former. Note that, in our experiments, we find
+that LFU usually outperforms LRU in teh corresponding cases, while
+some earlier works (e.g., []) have shown the reverse again usign the
+AOL query log. We believe this difference is based on our LFU
+implementation, as we guarantee that LFU (with and w/o admission
+policy) chooses the least recent cache entry among those with the
+smallest frequency value.
+
+Finally, Table 3 shows similar result when the eviction policy is
+GDSF-k (where $k$ is set to 4, experimentally). Note that, this
+eviction policy both takes into account the frequency and recency; and
+yields the highest hit ratios even without an admission
+policy. Therefore, the frequency-based admission policy can still
+improve it, but less signifcantly. In particular, with Pure frequency
+storage, the gains in hit ratio still range from 1.9\% to 6.6\%, while
+approximate storage approaches seem to be effective only for large
+cache sizes. Again, Tiny is better than its competitor Sliding Window,
+and may yield relative improvements of 1.8\% and 1.7\% for cache sizes
+set to 10\% and 20\%, respectively.
+
+\section{Related Work}
+
+
+\section{Conclusion}\label{conc}
+We revisited the frequency-based admission for search engine result
+caches and demonstrated that a recently proposed approach, so-called
+TinyLFU, improves hit ratios for caches with various eviction
+strategies. Furthermore, TinyLFU acheieves such gains using a very
+small storage space in comparison to storing the frequency history of
+the entire stream or of those within a (sliding) window. The latter is
+an important finding, because the current trend in query result
+caching is storing not only full query results but also docIDs for
+some subset of queries [], and for the latter case, even relatively
+small gains in storage space would allow caching more results, and
+further increasing the performance. Our work towards designing such
+hybrid caches with a frequency-based admission policy is underway.
+
+
+% \begin{table*}
+% \caption{Performance of LRU cache eviction augmented with the frequency-based admission policy using Pure, Sliding Window and Tiny approaches.  Columns $\mathcal{C}$, $\mathcal{H}$ and $\mathcal{M}$ denote the cache size (as a \% of distinct queries in the log), hit ratio and space usage (in kilobytes) for storing admission metadata (past frequencies). For Sliding Window and Tiny, $\mathcal{W}$ and $\mathcal{W/C}$ are window size and its ratio to cache size, respectively. For \textbf{None} and \textbf{Pure} approaches, $\mathcal{M}$ is $0$ and $11,264$ kilobytes, respectively, for all cache sizes.}
+% \begin{tabular}{|c | r | r | r | r | r | r | r | r | r | r |}
+% \hline
+% \multirow{2}{*}{$\mathcal{C}$} &\textbf{None} &
+% \multicolumn{3}{c |}{\textbf{Sliding Window}} &
+% \multicolumn{4}{c |}{\textbf{Tiny}} & \multicolumn{2}{c |}{\textbf{Pure}} \\
+% \cline{2-11}
+% & $\mathcal{H}$ & $\mathcal{H}$ & $\mathcal{M}$ & $\mathcal{W}$ &
+% $\mathcal{H}$ & $ Impr. (\%)$ & $\mathcal{M}$ & $\mathcal{W} / \mathcal{C}$ &
+% $Impr. (\%)$ & $\mathcal{H}_n$ \\ \hline
+% $\%1$ & 0.182 & 0.200 & 165 & 256,000 & 0.206 & \%13.2 & 50 & 128 & \textbf{0.236} &
+% \%29.6 \\ \hline
+% $\%2$ & 0.225 & 0.238 & 330 & 256,000 & 0.240 & \%6.6 & 88 & 64 & \textbf{0.261} &
+% \%16 \\ \hline
+% $\%5$ & 0.283 & 0.291 & 825 & 256,000 & 0.291 & \%2.8 & 165 & 16 & \textbf{0.297} &
+% \%4.9 \\ \hline
+% $\%10$ & 0.330 & \textbf{0.333} & 1650 & 256,000 & 0.332 & \%0.6 & 165 & 8 & 0.328 &
+% \%-0.6 \\ \hline
+% $\%20$ & 0.380 & 0.381 & 3298 & 256,000 & \textbf{0.381} & \%0.2 & 330 & 2 & 0.369 &
+% \%-2.8  \\ \hline
+% $\%30$ & \textbf{0.416} & 0.416 & 2639 & 2,000 & 0.415 & \%-0.2 & 495 & 2 & 0.386 &
+% \%-7.2  \\ \hline
+% %$\%40$ & \textbf{0.434} & 0.434 & 3519 & 2,000 & 0.433 & \%-0.2 & 660 & 2 & 0.408 &
+% %\%-5.9  \\ \hline
+% %$\%50$ & \textbf{0.448} & 0.448 & 4398 & 2,000 & 0.447 & \%-0.2 & 825 & 2 & 0.423 &
+% %\%-5.5 \\ \hline
+% %$\%60$ & 0.457 & 0 &  & & &  &  &  &  &  \\ \hline
+% %$\%70$ & 0.463 & 0 &  & & &  &  &  &  &  \\ \hline
+% %
+% \end{tabular}
+% \end{table*}
+
+% \vspace{0.2cm}
+
+% \begin{table*}
+% \caption{Performance of LFU cache eviction augmented with the frequency-based admission policy using Pure, Sliding Window and Tiny approaches.  Columns $\mathcal{C}$, $\mathcal{H}$ and $\mathcal{M}$ denote the cache size (as a \% of distinct queries in the log), hit ratio and space usage (in kilobytes) for storing admission metadata (past frequencies). For Sliding Window and Tiny, $\mathcal{W}$ and $\mathcal{W/C}$ are window size and its ratio to cache size, respectively. For \textbf{None} and \textbf{Pure} approaches, $\mathcal{M}$ is $0$ and $11,264$ kilobytes, respectively, for all cache sizes.}
+% \begin{tabular}{|c | r | r | r | r | r | r | r | r | r | r |}
+% \hline
+% \multirow{2}{*}{$\mathcal{C}$} &\textbf{None} &
+% \multicolumn{3}{c |}{\textbf{Sliding Window}} &
+% \multicolumn{4}{c |}{\textbf{Tiny}} & \multicolumn{2}{c |}{\textbf{Pure}} \\
+% \cline{2-11}
+% & $\mathcal{H}$ & $\mathcal{H}$ & $\mathcal{M}$ &
+% $\mathcal{W}$ & $\mathcal{H}$ & $Impr. (\%)$ & $\mathcal{M}$ &
+%  $\mathcal{W} / \mathcal{C}$ & $\mathcal{H}$ & $Impr. (\%)$  \\ \hline
+% $\%1$ & 0.197 & 0.214 & 110 & 8,000 & 0.227 & \%15.2 & 28 & 8 &
+% \textbf{0.258} & \%30.9 \\ \hline
+% $\%2$ & 0.235 & 0.251 & 308 & 16,000 & 0.264 & \%12.3 & 55 & 8 &
+% \textbf{0.295} & \%25.5 \\ \hline
+% $\%5$ & 0.306 & 0.309 & 660 & 32,000 & 0.326 & \%6.5 & 193 & 32 &
+% \textbf{0.343} & \%12.0 \\ \hline
+% $\%10$ & 0.367 & 0.361 & 1,430 & 64,000 & 0.37 & \%0.8 & 220 & 4 &
+% \textbf{0.381} & \%3.8 \\ \hline
+% $\%20$ & 0.405 & 0.401 & 3,079 & 128,000 & 0.41 & \%1.2 & 550 & 8 &
+% \textbf{0.415} & \%2.4 \\ \hline
+% $\%30$ & 0.429 & 0.426 & 4,618 & 128,000 & \textbf{0.431} & \%0.4 & 660 & 4 &
+% 0.431 & \%0.4 \\ \hline
+% %$\%40$ & \textbf{0.443} & 0.442 & 6,598 & 256,000 & 0.443 & \%0.0 & 880 & 4 &
+% %0.443 & \%0.0 \\ \hline
+% %$\%50$ & \textbf{0.452} & 0.452 & 8,246 & 256,000 & 0.452 & \%0.0 & 825 & 2 &
+% %0.452 & \%0.0 \\ \hline
+% %$\%60$ & 0.458 & 0 &  & & &  &  &  &  &  \\ \hline
+% %$\%70$ & 0.463 & 0 &  & & &  &  &  &  &  \\ \hline
+% %\vspace{0.2cm}
+% \end{tabular}
+% \end{table*}
+
+% \vspace{0.2cm}
+
+% \begin{table*}
+%  \caption{Performance of GDSF-k ($k=4$) cache eviction augmented with the frequency-based admission policy using Pure, Sliding Window and Tiny approaches.  Columns $\mathcal{C}$, $\mathcal{H}$ and $\mathcal{M}$ denote the cache size (as a \% of distinct queries in the log), hit ratio and space usage (in kilobytes) for storing admission metadata (past frequencies). For Sliding Window and Tiny, $\mathcal{W}$ and $\mathcal{W/C}$ are window size and its ratio to cache size, respectively. For \textbf{None} and \textbf{Pure} approaches, $\mathcal{M}$ is $0$ and $11,264$ kilobytes, respectively, for all cache sizes.}
+% \begin{tabular}{|c | r | r | r | r | r | r | r | r | r | r |}
+% \hline
+% \multirow{2}{*}{$\mathcal{C}$} &\textbf{None} &
+% \multicolumn{3}{c |}{\textbf{Sliding Window}} &
+% \multicolumn{4}{c |}{\textbf{Tiny}} & \multicolumn{2}{c |}{\textbf{Pure}} \\
+% \cline{2-11}
+% & $\mathcal{H}$ & $\mathcal{H}$ & $\mathcal{M}$ &
+% $\mathcal{W}$ & $\mathcal{H}$ & $Impr. (\%)$ & $\mathcal{M}$ &
+%  $\mathcal{W} / \mathcal{C}$ & $\mathcal{H}$ & $Impr. (\%)$ \\ \hline
+% $\%1$ & 0.241 & 0.216 & 110 & 8,000 & 0.23 & \%-4.5 & 33 & 16 & \textbf{0.257} & \%6.6 \\ \hline
+% $\%2$ & 0.279  & 0.259 & 308 & 16,000 & 0.272 & \%-2.5 & 66 & 16 & \textbf{0.294} & \%5.3 \\ \hline
+% $\%5$ & 0.332 & 0.32 & 660 & 32,000 & 0.333 & \%0.3 & 138 & 8 & \textbf{0.342} & \%3.0 \\ \hline
+% $\%10$ & 0.369 & 0.362 & 1540 & 128,000 & 0.376& \%1.8 & 275 & 8 & \textbf{0.379} & \%2.7 \\ \hline
+% $\%20$ & 0.405 & 0.401 & 3,079 & 128,000 & 0.412 & \%1.7 & 550 & 8 & \textbf{0.413} & \%1.9 \\
+% \hline
+% $\%30$ & 0.429 & 0.426 & 4,618 & 128,000 & \textbf{0.431} & \%0.4 & 660 & 4 & 0.431 & \%0.4 \\
+% \hline
+% %\%40$ & 0.443 & 0.442 & 6,598 & 256,000 & 0.443 & \%0.0 & 880 & 4 & 0.443 & \%0.0 \\ \hline
+% %$\%50$ & 0.452 & 0.452 & 8,246 & 256,000 & 0.452 & \%0.0 & 825 & 2 & 0.452 & \%0.0 \\ \hline
+% \end{tabular}
+% \end{table*}
+
+
+% \begin{figure}
+%   \includegraphics[scale=0.5]{tlfu.png}
+% \end{figure}

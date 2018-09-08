@@ -2,17 +2,15 @@
 // Created by yfy on 10/22/17.
 //
 
+#include <iostream>
 #include "cache/greedy_dual_size_k_cache.h"
 
-GreedyDualSizeKCache::GreedyDualSizeKCache(std::uint32_t s,
-                                           std::uint32_t k,
-                                           FrequencyHistogram* fh) :
-    Cache(s),
-    k_{k},
-    offset_{0} {
+constexpr float GreedyDualSizeKCache::estimated_freq_[20];
 
-  cache_ = new NodeDoublyLinkedList();
-  freq_hist_ = fh;
+GreedyDualSizeKCache::GreedyDualSizeKCache(std::uint32_t s, std::uint32_t k) :
+  Cache(s), k_{k}, offset_{0.0} {
+
+    cache_ = new NodeDoublyLinkedList();
 }
 
 GreedyDualSizeKCache::~GreedyDualSizeKCache() {
@@ -20,6 +18,9 @@ GreedyDualSizeKCache::~GreedyDualSizeKCache() {
 }
 
 bool GreedyDualSizeKCache::IsExist(const std::string& query) {
+  if (freq_hist_ == nullptr)
+    return InMemoryGdsfk(query);
+
   bool result = false;
 
   std::uint32_t estimated_freq = freq_hist_->Add(query);
@@ -56,6 +57,38 @@ bool GreedyDualSizeKCache::IsExist(const std::string& query) {
   return result;
 }
 
+bool GreedyDualSizeKCache::InMemoryGdsfk(const std::string& query) {
+  bool result = false;
+  NodeDoublyLinkedList::Node* current = cache_table_[query];
+
+  if (current != nullptr) {
+    result = true;
+    current->freq += 1;
+    current->score = HValue(current->freq);
+    PutBeforeHigherHValue(current);
+  } else {
+    if (count_ < size_) {
+      current = new NodeDoublyLinkedList::Node(query, HValue(1));
+      current->freq = 1;
+      cache_->PushFront(current);
+      cache_table_[query] = current;
+      PutBeforeHigherHValue(current);
+      count_++;
+    } else {
+      NodeDoublyLinkedList::Node* victim = cache_->head_->next;
+      offset_ = victim->score;
+      cache_table_.erase(victim->data);
+      victim->data = query;
+      victim->score = HValue(1);
+      victim->freq = 1;
+      cache_table_[query] = victim;
+      PutBeforeHigherHValue(victim);
+    }
+  }
+
+  return result;
+}
+
 void GreedyDualSizeKCache::PutBeforeHigherHValue(NodeDoublyLinkedList::Node* node) {
   NodeDoublyLinkedList::Node* more_hvalue = nullptr;
   NodeDoublyLinkedList::Node* curr = node;
@@ -74,5 +107,5 @@ void GreedyDualSizeKCache::PutBeforeHigherHValue(NodeDoublyLinkedList::Node* nod
 }
 
 std::string GreedyDualSizeKCache::ToString() const {
-  return cache_->ToString();
+  return "Aging Factor: " + std::to_string(offset_) + "\n" + cache_->ToString();
 }

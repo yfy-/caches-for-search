@@ -15,7 +15,6 @@ class RandomCache : public Cache {
  public:
   explicit RandomCache(uint32_t s);
   bool IsExist(const std::string&) override;
-  inline void SetFrequencyHistogram(FrequencyHistogram* fh) { freq_hist_ = fh; }
   virtual inline std::string ToString() const override { return ""; }
   virtual ~RandomCache();
 

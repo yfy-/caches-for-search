@@ -1,12 +1,61 @@
 \section{Introduction}
-Caching tecniques are solutions that generally considered first at
-hand to boost performance of applications, especially on web. It is
-the process of keeping the items that are more likely to appear in the
-future at a faster or a closer store so that these items can be served
-within shorter times. Hence, accomodating a cache for a system can
-marginally increase the average system throughput of response with
-reasonably small costs. Concretely, as the number of items served from
-the cache increases, the system performance will also increase.
+Large-scale search engines extensively employ caching to store
+pre-fetched and/or pre-computed data items, such as query result
+pages, postings lists and their intersections, documents, etc., in the
+main memory. Research on caching addresses various questions each
+yielding alternative policies, such as which items should be accepted
+into the cache (admission), which item should be removed from the
+cache when it is full (eviction), whether an item should be cached
+even before requested (prefetching) and when the data item in cache
+should be re-fetched or -computed (refreshing) [barla, fabrizio].
+
+Recent work on query result caching has shown that admission policies
+for such a cache may be useful, especially when the cache is segmented
+[] and/or results are stored in alternative formats (such as the top-k
+results' URLs and snippets vs. just document identifiers) []. In this
+paper, we adapt an existing admission policy, so-called TinyLFU [], to
+the result caching for search engines. TinyLFU decides on the query
+results to be cached using the frequency information of a large number
+of previous queries (i.e., an order of magnitude larger than those in
+the cache). While doing so, it employs a compact storage scheme with
+Counting Bloom Filters (CBF) to store past query frequencies. Our
+evaluation in this paper shows that TinyLFU admission policy coupled
+with various eviction schemes improve cache hit ratios. Furthermore,
+the additional space overhead for storing the metadata (i.e., past
+query frequencies) is considerably low (in comparison to a plain
+storage of frequencies) due to the use of CBFs.
+
+Our findings are important because: (i) they verify the previous work
+[] in that admission policies are useful for caching in web search
+where query stream exhibits a power-law distribution, and (ii) they
+show that improvements in hit ratios are achievable using only a small
+storage space (i.e., a tiny fraction of available cache space) for
+admission policy metadata. This makes tinyLFU a perfect candidate to
+be used with result cache types where the space trade-off for the
+cache content vs. admission metadata is strict (such as a result cache
+that stores only docIDs as query results (as in []), and hence, opens
+a direction for devising new hybrid caches for search engines. While
+this paper presents the preliminary results demonstrating the benefits
+of using TinyLFU with a traditional result cache (i.e., storing top-k
+results’ URLs and snippets) while our work in the latter direction
+(with a docID cache) is in progress.
+
+In the following section, we briefly describe TinyLFU admission policy
+together with its metadata storage scheme. In Section 3, we first
+describe the eviction strategies that are applied for the result cache
+together with TinyLFU, and then provide details for the simulation
+setup. We report our simulation results in Section 4 and provide
+concluding discussions in Section 5.
+
+%Caching tecniques are solutions that generally considered first at
+%hand to boost performance of applications, especially on web. It is
+%the process of keeping the items that are more likely to appear in
+%the future at a faster or a closer store so that these items can be
+%served within shorter times. Hence, accomodating a cache for a system
+%can marginally increase the average system throughput of response
+%with reasonably small costs. Concretely, as the number of items
+%served from the cache increases, the system performance will also
+%increase.
 
 Whenever an item is served from the cache, we call it a cache
 \textit{hit} and the opposite is called a cache
@@ -113,34 +162,37 @@ Lastly we show that \textit{Tiny LFU} can perform better when
 augmented with an adaptation of \textit{Greedy Dual Size Frequency}
 cache eviction policy.
 
-Section \ref{admission} describes the
-distinction between admission and eviction policies and gives an
-algorithm to generalize their usage. Section \ref{primer} briefly
-introduces \textit{Bloom Filters} and approximation
-sketches. \textit{Tiny LFU} and \textit{Sliding window} are discussed
-and compared in Section \ref{tiny}. Our experimental setup and
-\textit{Tiny LFU} customization is explained in Section \ref{experiment} as well as
-approximate storage sizes of cache admission and eviction policies under discussion.
-Section \ref{res} presents our results on AOL query log dataset and finally Section \ref{conc}
-concludes this paper.
+Section \ref{admission} describes the distinction between admission
+and eviction policies and gives an algorithm to generalize their
+usage. Section \ref{primer} briefly introduces \textit{Bloom Filters}
+and approximation sketches. \textit{Tiny LFU} and \textit{Sliding
+  window} are discussed and compared in Section \ref{tiny}. Our
+experimental setup and \textit{Tiny LFU} customization is explained in
+Section \ref{experiment} as well as approximate storage sizes of cache
+admission and eviction policies under discussion.  Section \ref{res}
+presents our results on AOL query log dataset and finally Section
+\ref{conc} concludes this paper.
 
 \section{Cache Admission and Eviction Policies}\label{admission}
 
 \begin{algorithm}
-  \caption{Generalized algorithm for cache eviction policies augmented with admission policies.}
+  \caption{Generalized algorithm for cache eviction policies augmented
+    with frequency based admission policies.}
   \label{alg:request}
   \begin{algorithmic}[1]
     \Function{Request}{$item$}
-    \State $popularity \gets \Call{admission-add}{item}$
+    \State $freq \gets \Call{admission-add}{item}$
+    \State $res \gets false$
     \If{$item$ is in cache}
+    \State $res \gets true$
     \State $\Call{choose-new-victim}$
     \Else
     \If{Cache is not full}
-    \State Admit $item$ with new $popularity$
+    \State Admit $item$ with new $freq$
     \State $\Call{choose-new-victim}$
     \Else
     \State $victim \gets \Call{get-victim}$
-    \If{$popularity \geq \Call{admission-estimate}{victim}$}
+    \If{$freq \geq \Call{admission-estimate}{victim}$}
     \State Evict $victim$ admit $item$
     \State $\Call{choose-new-victim}$
     \Else
@@ -148,6 +200,7 @@ concludes this paper.
     \EndIf
     \EndIf
     \EndIf
+    \State \Return $res$
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
@@ -158,13 +211,16 @@ decision can be based on \textit{LRU} or \textit{LFU} as already
 discussed earlier. When used without an augmented admission policy,
 the cache victim is always evicted and newly requested item is always
 admitted. Conversely, the the newly requested item is only admitted to
-the cache if its more popular than cache victim according to the admission policy.
-Algorithm \ref{alg:request} presents a generalized method. In line 2 the admission policy gives a popularity value of newly requested item. This is usually
-an estimated frequency. Notice that on line 11 the ties are broken in favor of the recent item.
-
+the cache if its more popular than cache victim according to the
+admission policy.  Algorithm \ref{alg:request} presents a generalized
+method that uses a frequency based admission policy. In line 2 the
+admission policy updates the given item's frequency and returns
+it. Notice that on line 13 the ties are broken in favor of the recent
+item.
 
 \subsection{Eviction Policies Used in Experiments}
-In this section we briefly describe the eviction policies that we've experimented with.
+In this section we briefly describe the eviction policies that we've
+experimented with.
 
 \subsubsection{Least Frequently Used.}
 Victim suggested is the item that has the least frequency. To prevent
@@ -185,7 +241,7 @@ Greedy Dual Size Frequency is proposed by \cite{arlitt2000evaluating}
 that can offer a good compromise between recency and frequency that is
 also cost aware. However, for our concerns the cost awareness is
 ignored. Victim suggested is the item that has the lowest
-$\mathcal{H}_{value}$ which is given in \ref{eq:1}.  $\mathcal{F}_i$
+          $\mathcal{H}_{value}$ which is given in \ref{eq:1}.  $\mathcal{F}_i$
 is the frequency of the item, $\mathcal{C}_i$ and $\mathcal{S}_i$ are
 cost and size of page of item respectively (equal to 1). Lastly,
 $\mathcal{L}$ is the aging factor that is updated to the
@@ -255,7 +311,7 @@ singletons i.e. occurring a single time throughout the most recent
 accesses of length $W$. Due to large number of singleton items, an
 approximation sketch may result in many hash collisions in a brief
 time, thus resulting in poor frequency approximation for the rest of
-the data stream. In such sketches it is called that the sketch is
+the data stream. In such cases, it is called that the sketch is
 saturated \cite{dimitropoulos2008eternal}. Therefore, to achieve
 accurate approximations, admission policies that make use of
 approximation sketches should deal with the saturation problem,
@@ -265,39 +321,55 @@ especially on Zipf-like distributions.
 \section{Tiny LFU and Sliding Window}\label{tiny}
 \subsection{Sliding Window Approach}
 
-\textit{Sliding Window} keeps $l$ identical sketches called segments
-with a total size of $W$ counters where each sketch has $\frac{W}{l}$
-counters. $l$ number of sketches are kept in a FIFO queue. At each
-item access only the sketch at the front is manipulated until $l$
-times of accesses are obtained. Afterwards, the sketch at the front is
-inserted at the end of the queue and a new sketch is fetched and all
-of its counters are set to 0. Therefore, frequency about least
-recently accessed $\frac{W}{l}$ items are forgotten. Notice that this
-method allows the sketch to avoid early saturation, also a sliding
-window is obtained with the step size of $\frac{W}{l}$.
+\textit{Sliding Window} keeps $l$ identical sketches called segments.
+Identical, $l$ number of sketches are kept in a FIFO queue. At each
+item access, only the sketch at the front is manipulated until
+$\frac{W}{l}$ times of accesses are obtained. Afterwards, the sketch
+at the front is inserted at the end of the queue and a new sketch is
+fetched and all of its counters are set to 0. Therefore, frequency
+about least recently accessed $\frac{W}{l}$ items are
+forgotten. Notice that this method allows the sketch to avoid early
+saturation, also a sliding window is obtained with the step size of
+$\frac{W}{l}$.
 
 In terms of storage, each counter at a segment can be capped to $\log
 \frac{W}{l}$ since it is the maximum number that an item can
-occur. However also note that, when doing an estimation for an item,
-$l$ distinct sketches should estimate and their results should be
-accumulated. As a result, the estimation time will be costly for large
-$l$. Therefore, we can give the total required number of bits of the
-\textit{Sliding Window} approach as;
+occur. However, also note that, when doing an estimation for an item,
+$l$ distinct sketches should be accessed and their frequency
+estimations accumulated. As a result, the estimation time will be
+costly for large $l$. Therefore, we can give the total required number
+of bits of the \textit{Sliding Window} approach as in Equation
+\ref{eq:straw} where $n$ is the number of counters per segment;
 
-$$
-W \times log_2\left(\frac{W}{l}\right)+ log_2l
-$$
+\begin{equation}
+  \label{eq:straw}
+n \times l \times log_2\left(\frac{W}{l}\right)
+\end{equation}
 
 \subsection{Tiny LFU}
-\textit{Tiny LFU} contains a single \textit{SBF}. To have the feel of
-\textit{W-LFU}, \textit{Tiny LFU} has a novel mechanism to keep the
-sketch fresh i.e. take recency into account called the reset
-method. \textit{Tiny LFU} keeps a window counter starting from 0 and
-it is incremented after each access. Whenever the window counter is
-equal to $W$, all of the counters in the sketch as well as the window
-counter are divided by 2. Notice that this operation can be obtained
-by right shifting bits of the counters by 1. More detail and the
-justification of the reset method is presented in
+\textit{Tiny LFU} contains a single \textit{SBF} and a simple bloom
+filter that is called the \textit{doorkeeper}. Usage of an additional
+\textit{doorkeeper} might be seen as a storage overhead but its
+existence allows the \textit{SBF} to have less counters. For an
+accessed item, \textit{Tiny LFU} first checks its bits in the
+doorkeeper, and only further increases the full counters if the item
+already exists in the doorkeeper. This way, singleton items are not
+reserved full counters in the \textit{SBF}. This brings 2 benefits,
+firstly it slows down or avoids the saturation of the sketch due to
+the fact that there will be less collisions. Secondly, since the most
+of the items are singletons, we can reserve less full counters in the
+\textit{SBF}. Therefore, by adding a doorkeeper, length of the
+\textit{SBF} where full counters reside can be marginally decreased.
+
+To have the feel of \textit{W-LFU}, \textit{Tiny LFU} has a novel
+mechanism to keep the sketch fresh i.e. take recency into account
+called the reset method. \textit{Tiny LFU} keeps a window counter
+starting from $0$ and it is incremented after each access. Whenever
+the window counter is equal to $W$, all of the counters in the sketch
+as well as the window counter are divided by 2 and the bits in the
+\textit{doorkeeper} are all set to $0$. Notice that this operation can
+be obtained by right shifting bits of the counters by 1. More detail
+and the justification of the reset method is presented in
 \cite{einziger2014tinylfu}.
 
 Concretely, the most important improvement that \textit{Tiny LFU}
@@ -305,134 +377,135 @@ brings is its storage optimizations, as its name also refers
 to. Since, for a cache of size $C$ an item should reside in the cache
 if it has a larger frequency than $1 / C$. Therefore, for a window
 size of $W$, each counter can be capped to $log_2 \frac{W}{C}$ bits
-since it already deserves to be in cache i.e. there is no need to
-further increment its counter. For instance, if $W / C = 7$ then only
-3 bits counters are sufficient.
+since it already deserves to be in cache when its frequency hit
+$\frac{W}{C}$ i.e. there is no need to further increment its
+counters. For instance, if $W / C = 7$ then only 3 bits counters are
+sufficient.
 
-Another storage optimization of \textit{Tiny LFU} also solves the
-problem of saturation. Rather than only keeping an \textit{SBF} for
-all items in a data stream, \textit{Tiny LFU} also contains a Bloom
-filter which is called the doorkeeper. For an accessed item,
-\textit{Tiny LFU} first checks its bits in the doorkeeper, and only
-further increases the full counters if the item exists in the
-doorkeeper. This way, singleton items are not reserved full counters
-in the \textit{SBF}. This brings 2 benefits, firstly it slows down or
-avoids the saturation of the sketch due to the fact that there will be
-less collisions. Secondly, since the most of the items are singletons,
-we can reserve less full counters in the \textit{SBF}. Therefore, by
-adding a $W$ size of bits to doorkeeper, length of the \textit{SBF}
-where full counters reside can be marginally decreased. Moreover,
-since the doorkeeper can count up to 1, full counters are only
-necessary to count up to $\frac{W}{C} - 1$. Therefore, when estimating
-a frequency, estimation from the doorkeeper and \textit{SBF} are added
-and returned. Assuming that a doorkeeper with $W$ bits, and full
-counters \textit{SBF} with length $d$ such that $d \ll W$, the total
-number of bits required to allocate for \textit{Tiny LFU} is;
+ Moreover, since the doorkeeper can count up to 1, full counters are
+ only necessary to count up to $\frac{W}{C} - 1$. Therefore, when
+ estimating a frequency, estimation from the doorkeeper and
+ \textit{SBF} are added and returned. Assuming that a doorkeeper with
+ $d$ bits, and full counters \textit{SBF} with length $n$ such that
+ $n < d$, the total number of bits required to allocate for \textit{Tiny
+   LFU} is given in Equation \ref{eq:tiny};
 
-$$
-W + d \times log_2 \left(\frac{W}{C} - 1\right) + log_2 W
-$$
+ \begin{equation}
+   \label{eq:tiny}
+d + n \times log_2 \left(\frac{W}{C} - 1\right)
+\end{equation}
 
-\begin{table}
-\caption{For each eviction policy and cache size the best admission
-  policies Hit-Rate is written in bold.  For window lfu variants
-  (strawman and tiny) best working window size is shown in the table.}
-\begin{tabular}{| c | c | c | c | c | c | c | c | c | c | c | c | c |}
-    \cline{1-7}
-    Eviction&
-    \multicolumn{3}{c |}{\textbf{random}} & \multicolumn{3}{c |}{\textbf{lru}} \\ \cline{1-7}
-    Admission& C & HR & M & C & HR & M \\ \cline{1-7}
-    \multirow{10}{*}{\textbf{none}} & 6723 & 0.169947 & 131 & 6723 & \textbf{0.191673} & 183 \\
-    & 13446 & 0.2084 & 262 & 13446 & \textbf{0.235173} & 367 \\
-    & 20169 & 0.232347 & 393 & 20169 & {\color{red} \textbf{0.2602}} & 551 \\
-    & 26892 & 0.24986 & 505 & 26892 & {\color{red} \textbf{0.278367}} & 735 \\
-    & 33615 & 0.266093 & 656 & 33615 & {\color{red} \textbf{0.293233}} & 919 \\
-    & 40338 & 0.280073 & 787 & 40338 & {\color{red} \textbf{0.305033}} & 1102 \\
-    & 47061 & 0.29122 & 919 & 47061 & {\color{red} \textbf{0.314273}} & 1286 \\
-    & 53784 & 0.301453 & 1050 & 53784 & {\color{red} \textbf{0.321947}} & 1470 \\ \cline{8-13}
-    & 60507 & 0.31078 & 1181 & 60507 & {\color{red} \textbf{0.328093}} & 1654 &
-    \multicolumn{3}{c|}{\textbf{lfu}} &
-    \multicolumn{3}{c|}{\textbf{gdsfk}} \\ \cline{8-13}
-    & 67230 & 0.31728 & 1313 & 67230 & {\color{red} \textbf{0.333467}} & 1838 & C & HR & M & C & HR &
-    M \\ \hline
-    \multirow{10}{*}{\textbf{strawman}} & 6723 & 0.190513 ($16$) & 354 & 6723 & 0.187693 ($16$) & 407 &
-    6723 & 0.200427 ($16$) & 433 & 6723 & \textbf{0.200313} ($16$) & 433\\
-    & 13446 & 0.216367 ($8$) & 485 & 13446 & 0.2173 ($8$) & 590 & 13446 & 0.224187 ($8$) & 643 &
-    13446 & \textbf{0.224253} ($4$) & 525\\
-    & 20169 & 0.240367 ($8$) & 748 & 20169 & 0.24176 ($8$) & 906 & 20169 & \textbf{0.24582} ($8$) &
-    984 & 20169 & 0.24583 ($8$) & 984\\
-    & 26892 & 0.252547 ($4$) & 748 & 26892 & 0.252287 ($2$) & 840 & 26892 & 0.25844 ($2$) & 1063 &
-    26892 & \textbf{0.25866} ($4$) & 1063\\
-    & 33615 & 0.26694 ($4$) & 951 & 33615 & 0.266693 ($2$) & 1058 & 33615 & 0.273713 ($4$) & 1345 &
-    33615 & \textbf{0.273713} ($4$) & 1345\\
-    & 40338 & 0.280567 ($4$) & 1142 & 40338 & 0.276273 ($4$) & 1457 & 40338 & \textbf{0.283233} ($4$) &
-    1615 & 40338 & 0.283233 ($4$) & 1615\\
-    & 47061 & 0.291813 ($4$) & 1332 & 47061 & 0.287313 ($4$) & 1700 & 47061 & 0.293653 ($4$) & 1884 &
-    47061 & \textbf{0.293653} ($4$) & 1884\\
-    & 53784 & 0.30002 ($2$) & 1273 & 53784 & 0.29664 ($2$) & 1693 & 53784 & 0.302013 ($2$) & 1903 &
-    53784 & \textbf{0.302013} ($2$) & 1903\\
-    & 60507 & 0.308453 ($2$) & 1432 & 60507 & 0.300033 ($2$) & 1905 & 60507 & 0.308673 ($2$) & 2141 &
-    60507 & \textbf{0.308673} ($2$) & 2141\\
-    & 67230 & 0.315227 ($2$) & 1608 & 67230 & 0.31246 ($2$) & 2133 & 67230 & \textbf{0.316167} ($2$) &
-    2396 & 67230 & 0.316167 ($2$) & 2396\\
-    \hline
-    \multirow{10}{*}{\textbf{tiny}} & 6723 & 0.221373 ($16$) & 170 & 6723 & 0.20148 ($16$) & 223 &
-    6723 & \textbf{0.222393} ($16$) & 249 & 6723 & 0.229373 ($16$) & 249\\
-    & 13446 & 0.245493 ($8$) & 295 & 13446 & {\color{red} 0.23518 ($2$)} & 372 & 13446 & 0.248387 ($8$) &
-    453 & 13446 & {\color{red} \textbf{0.25766} ($8$)} & 425\\
-    & 20169 & 0.265993 ($8$) & 443 & 20169 & 0.260047 ($2$) & 558 & 20169 & 0.275907 ($8$) &
-    679 & 20169 & {\color{red} \textbf{0.27858} ($4$)} & 637\\
-    & 26892 & 0.270473 ($4$) & 551 & 26892 & 0.278147 ($2$) & 745 & 26892 & 0.276967 ($4$) & 866 &
-    26892 & {\color{red} \textbf{0.289247} ($4$)} & 850\\
-    & 33615 & 0.285753 ($4$) & 689 & 33615 & 0.292653 ($2$) & 931 & 33615 & 0.292253 ($2$) & 1062 &
-    33615 & {\color{red} \textbf{0.301527} ($4$)} & 1062\\
-    & 40338 & 0.297587 ($4$) & 827 & 40338 & 0.304447 ($2$) & 1117 & 40338 & 0.307867 ($2$) &
-    1275 & 40338 & {\color{red} \textbf{0.31112} ($4$)} & 1275\\
-    & 47061 & 0.30802 ($4$) & 965 & 47061 & 0.313427 ($2$) & 1304 & 47061 & 0.31812 ($2$) & 1487 &
-    47061 & {\color{red} \textbf{0.31812} ($2$)} & 1487\\
-    & 53784 & 0.305333 ($2$) & 1070 & 53784 & 0.321187 ($2$) & 1490 & 53784 & \textbf{0.32506} ($2$) &
-    1700 & 53784 & {\color{red} 0.32506 ($2$)} & 1700\\
-    & 60507 & 0.31314 ($2$) & 1203 & 60507 & 0.32734 ($2$) & 1676 & 60507 & \textbf{0.330893} ($2$) &
-    1913 & 60507 & {\color{red} 0.330893 ($2$)} & 1913\\
-    & 67230 & 0.320467 ($2$) & 1337 & 67230 & 0.33244 ($2$) & 1862 & 67230 & \textbf{0.33522} ($2$) &
-    2125 & 67230 & {\color{red} 0.33522 ($2$)} & 2125\\
-    \hline
-    \multirow{10}{*}{\textbf{pure}} & 6723 & {\color{red} 0.2353} & 3282 & 6723 &
-             {\color{red} 0.20608} & 3335 &
-    6723 & {\color{red} \textbf{0.245173}} & 3361 & 6723 & {\color{red} 0.24424} & 3361\\
-    & 13446 & {\color{red} 0.261127} & 3414 & 13446 & 0.231893 & 3519 & 13446 &
-    {\color{red} \textbf{0.274787}} & 3571 &
-    13446 & 0.2739 & 3571\\
-    & 20169 & {\color{red} 0.276493} & 3545 & 20169 & 0.25 & 3702 & 20169 &
-    {\color{red} \textbf{0.294327}} & 3781 &
-    20169 & 0.291067 & 3781\\
-    & 26892 & {\color{red} 0.288467} & 3676 & 26892 & 0.264533 & 3886 & 26892 &
-    {\color{red} \textbf{0.30474}} & 3991 &
-    26892 & 0.304673 & 3991\\
-    & 33615 & {\color{red} 0.297653} & 3808 & 33615 & 0.272447 & 4070 & 33615 &
-    {\color{red} \textbf{0.312333}} & 4201 &
-    33615 & 0.312333 & 4201\\
-    & 40338 & {\color{red} 0.306853} & 3939 & 40338 & 0.282847 & 4254 & 40338 &
-    {\color{red} \textbf{0.31914}} &
-    4412 & 40338 & 0.31914 & 4412\\
-    & 47061 & {\color{red} 0.314273} & 4070 & 47061 & 0.29354 & 4438 & 47061 &
-    {\color{red} \textbf{0.324753}} & 4622 &
-    47061 & 0.324753 & 4622\\
-    & 53784 & {\color{red} 0.320747} & 4201 & 53784 & 0.298833  & 4622 & 53784 &
-    {\color{red} \textbf{0.32944}} & 4832 & 53784 & 0.32944 & 4832\\
-    & 60507 & {\color{red} 0.326907} & 4333 & 60507 & 0.30684 & 4805 & 60507 &
-    {\color{red} \textbf{0.33366}} & 5042 & 60507 & 0.33366  & 5042\\
-    & 67230 & {\color{red} 0.3316} & 4464 & 67230 & 0.313627 & 4989 & 67230 &
-    {\color{red} \textbf{0.33726}} &
-    5252 & 67230 & 0.33726 & 5252\\
-    \hline
-
-
-\end{tabular}
-\end{table}
-
-\section{Experimental Setup}\label{experiment}
+ \section{Experimental Setup}\label{experiment}
+ \begin{figure*}
+   \label{fig:zipf}
+   \includegraphics{zipf_plot.png}
+ \end{figure*}
+ In the experiments, we use a subset of size $1$ million from the AOL
+ query log.  We treat each individual query as bag of words in which
+ the order will not matter between query terms. The subset has
+ $562,966$ distinct queries, where in Figure \ref{fig:zipf} we
+ compared its distribution to different synthetic workloads to present
+ the characteristics of our query log.
 
 \section{Results}\label{res}
 
 \section{Conclusion}\label{conc}
+
+\begin{table*}
+\caption{Comparing different admission policies for an LRU eviction policy}
+\begin{tabular}{| c | c | c | c | c | c | c | c | c | c | c |}
+\hline
+\multirow{2}{*}{$\mathcal{C}$} & \multicolumn{2}{c |}{\textbf{none}} &
+\multicolumn{3}{c |}{\textbf{strawman}} &
+\multicolumn{3}{c |}{\textbf{tiny}} & \multicolumn{2}{c |}{\textbf{pure}} \\
+\cline{2-11}
+& $\mathcal{H}$ & $\mathcal{M}$ & $\mathcal{H}$ & $\mathcal{M}$ & $\mathcal{W}$
+& $\mathcal{H}$ & $\mathcal{M}$ &
+ $\mathcal{W}$ & $\mathcal{H}$ & $\mathcal{M}$ \\ \hline
+$\%1$ & 0.182 & 0 & & & & 0.206 & 50kb & 720512 & \textbf{0.236} & 11264kb \\
+\hline
+$\%2$ & 0.225 & 0 & & & & 0.24 & 88kb & 720512 & \textbf{0.261} & 11264kb \\
+\hline
+$\%5$ & 0.283 & 0 & & & & 0.291 & 165kb & 450320 & \textbf{0.297} & 11264kb \\
+\hline
+$\%10$ & \textbf{0.33} & 0 & & & & 0.33 & 165kb & 112580 & 0.328 & 11264kb \\
+\hline
+$\%20$ & 0.38 & 0 & & & & \textbf{0.381} & 330kb& 225160 & 0.369 & 11264kb \\
+\hline
+$\%30$ & \textbf{0.416} & 0 & & & & 0.415 & 495kb & 337740 & 0.386 & 11264kb \\
+\hline
+$\%40$ & \textbf{0.434} & 0 & & & & 0.433 & 660kb & 450320 & 0.408 & 11264kb \\
+\hline
+$\%50$ & \textbf{0.448} & 0 & & & & 0.447 & 825kb & 562900 & 0.423 & 11264kb \\
+\hline
+$\%60$ & 0.457 & 0 &  & & &  &  &  &  &  \\ \hline
+$\%70$ & 0.463 & 0 &  & & &  &  &  &  &  \\ \hline
+\end{tabular}
+\end{table*}
+
+\begin{table*}
+\caption{Comparing different admission policies for an LFU eviction policy}
+\begin{tabular}{| c | c | c | c | c | c | c | c | c | c | c |}
+\hline
+\multirow{2}{*}{$\mathcal{C}$} & \multicolumn{2}{c |}{\textbf{none}} &
+\multicolumn{3}{c |}{\textbf{strawman}} &
+\multicolumn{3}{c |}{\textbf{tiny}} & \multicolumn{2}{c |}{\textbf{pure}} \\
+\cline{2-11}
+& $\mathcal{H}$ & $\mathcal{M}$ & $\mathcal{H}$ & $\mathcal{M}$ &
+$\mathcal{W}$ & $\mathcal{H}$ & $\mathcal{M}$ &
+ $\mathcal{W}$ & $\mathcal{H}$ & $\mathcal{M}$ \\ \hline
+$\%1$ & 0.197 & 0 & 0.214 & 110kb & 8000 & 0.227 & 28kb & 45032 &
+\textbf{0.258} & 11264kb\\ \hline
+$\%2$ & 0.235 & 0 & 0.251 & 308kb & 16000 & 0.264 & 55kb & 90064 &
+\textbf{0.295} & 11264kb\\ \hline
+$\%5$ & 0.306 & 0 & 0.309 & 660kb & 32000 & 0.326 & 193kb & 900640 &
+\textbf{0.343} & 11264kb\\ \hline
+$\%10$ & 0.367 & 0 & 0.361 & 1430kb & 64000 & 0.37 & 220kb & 225160 &
+\textbf{0.381} & 11264kb\\ \hline
+$\%20$ & 0.405 & 0 & 0.401 & 3079kb & 128000 & 0.41 & 550kb & 900640 &
+\textbf{0.415} & 11264kb \\ \hline
+$\%30$ & 0.429 & 0 & 0.426 & 4618kb & 128000 & \textbf{0.431} & 660kb & 675480 &
+0.431 & 11264kb \\ \hline
+$\%40$ & \textbf{0.443} & 0 & 0.442 & 6598kb & 256000 & 0.443 & 880kb & 900640 &
+0.443 & 11264kb \\ \hline
+$\%50$ & \textbf{0.452} & 0 & 0.452 & 8246kb & 256000 & 0.452 & 825kb & 562900 &
+0.452 & 11264kb \\ \hline
+$\%60$ & 0.458 & 0 &  & & &  &  &  &  &  \\ \hline
+$\%70$ & 0.463 & 0 &  & & &  &  &  &  &  \\ \hline
+\end{tabular}
+\end{table*}
+
+\begin{table*}
+  \caption{Comparing different admission policies for an GDSF eviction policy
+    using $4$ for $k$}
+\begin{tabular}{| c | c | c | c | c | c | c | c | c | c | c |}
+\hline
+\multirow{2}{*}{$\mathcal{C}$} & \multicolumn{2}{c |}{\textbf{none}} &
+\multicolumn{3}{c |}{\textbf{strawman}} &
+\multicolumn{3}{c |}{\textbf{tiny}} & \multicolumn{2}{c |}{\textbf{pure}} \\
+\cline{2-11}
+& $\mathcal{H}$ & $\mathcal{M}$ & $\mathcal{H}$ & $\mathcal{M}$ &
+$\mathcal{W}$ & $\mathcal{H}$ & $\mathcal{M}$ &
+ $\mathcal{W}$ & $\mathcal{H}$ & $\mathcal{M}$ \\ \hline
+$\%1$ & 0.241 & 0 & 0.216 & 110kb & 8000 & 0.23 & 33kb & 90064 & 0.257 &
+11264kb \\ \hline
+$\%2$ & 0.279 & 0 & 0.259 & 308kb & 16000 & 0.272 & 66kb & 180128 & 0.294 &
+11264kb \\ \hline
+$\%5$ & 0.332 & 0 & 0.32 & 660kb & 32000 & 0.333 & 138kb & 225160 & 0.342 &
+11264kb \\ \hline
+$\%10$ & 0.369 & 0 & 0.362 & 1540kb & 128000 & 0.376 & 275kb & 450320 & 0.379 &
+11264kb \\ \hline
+$\%20$ & 0.405 & 0 & 0.401 & 3079kb & 128000 & 0.412 & 550kb & 900640 & 0.413 &
+11264kb \\ \hline
+$\%30$ & 0.429 & 0 & 0.426 & 4618kb & 128000 & 0.431 & 660kb & 675480 & 0.431 &
+11264kb \\ \hline
+$\%40$ & 0.443 & 0 & 0.442 & 6598kb & 256000 & 0.443 & 880kb & 900640 & 0.443 &
+11264kb \\ \hline
+$\%50$ & 0.452 & 0 & 0.452 & 8246kb & 256000 & 0.452 & 825kb & 562900 & 0.452 &
+11264kb \\ \hline
+\end{tabular}
+\end{table*}
+
+\begin{figure}
+  \includegraphics[scale=0.5]{tlfu.png}
+\end{figure}

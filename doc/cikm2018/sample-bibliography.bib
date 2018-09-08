@@ -1,0 +1,1638 @@
+%%% ====================================================================
+%%%  BibTeX-file{
+%%%     author          = "Gerry Murray",
+%%%     version         = "1.2",
+%%%     date            = "2 April 2012",
+%%%     filename        = "acmsmall-sample-bibfile.bib",
+%%%     address         = "ACM, NY",
+%%%     email           = "murray at hq.acm.org",
+%%%     codetable       = "ISO/ASCII",
+%%%     keywords        = "ACM Reference Format, bibliography, citation, references",
+%%%     supported       = "yes",
+%%%     docstring       = "This BibTeX database file contains 'bibdata' entries
+%%%                        that 'match' the examples provided in the Specifications Document
+%%%                        AND, also, 'legacy'-type bibs. It should assist authors in
+%%%                        choosing the 'correct' at-bibtype and necessary bib-fields
+%%%                        so as to obtain the appropriate ACM Reference Format output.
+%%%                        It also contains many 'Standard Abbreviations'. "
+%%%  }
+%%% ====================================================================
+
+% Journals
+
+% First the Full Name is given, then the abbreviation used in the AMS Math
+% Reviews, with an indication if it could not be found there.
+% Note the 2nd overwrites the 1st, so swap them if you want the full name.
+
+ %{AMS}
+ @String{AMSTrans = "American Mathematical Society Translations" }
+ @String{AMSTrans = "Amer. Math. Soc. Transl." }
+ @String{BullAMS = "Bulletin of the American Mathematical Society" }
+ @String{BullAMS = "Bull. Amer. Math. Soc." }
+ @String{ProcAMS = "Proceedings of the American Mathematical Society" }
+ @String{ProcAMS = "Proc. Amer. Math. Soc." }
+ @String{TransAMS = "Transactions of the American Mathematical Society" }
+ @String{TransAMS = "Trans. Amer. Math. Soc." }
+
+ %ACM
+ @String{CACM = "Communications of the {ACM}" }
+ @String{CACM = "Commun. {ACM}" }
+ @String{CompServ = "Comput. Surveys" }
+ @String{JACM = "J. ACM" }
+ @String{ACMMathSoft = "{ACM} Transactions on Mathematical Software" }
+ @String{ACMMathSoft = "{ACM} Trans. Math. Software" }
+ @String{SIGNUM = "{ACM} {SIGNUM} Newsletter" }
+ @String{SIGNUM = "{ACM} {SIGNUM} Newslett." }
+
+ @String{AmerSocio = "American Journal of Sociology" }
+ @String{AmerStatAssoc = "Journal of the American Statistical Association" }
+ @String{AmerStatAssoc = "J. Amer. Statist. Assoc." }
+ @String{ApplMathComp = "Applied Mathematics and Computation" }
+ @String{ApplMathComp = "Appl. Math. Comput." }
+ @String{AmerMathMonthly = "American Mathematical Monthly" }
+ @String{AmerMathMonthly = "Amer. Math. Monthly" }
+ @String{BIT = "{BIT}" }
+ @String{BritStatPsych = "British Journal of Mathematical and Statistical
+          Psychology" }
+ @String{BritStatPsych = "Brit. J. Math. Statist. Psych." }
+ @String{CanMathBull = "Canadian Mathematical Bulletin" }
+ @String{CanMathBull = "Canad. Math. Bull." }
+ @String{CompApplMath = "Journal of Computational and Applied Mathematics" }
+ @String{CompApplMath = "J. Comput. Appl. Math." }
+ @String{CompPhys = "Journal of Computational Physics" }
+ @String{CompPhys = "J. Comput. Phys." }
+ @String{CompStruct = "Computers and Structures" }
+ @String{CompStruct = "Comput. \& Structures" }
+ @String{CompJour = "The Computer Journal" }
+ @String{CompJour = "Comput. J." }
+ @String{CompSysSci = "Journal of Computer and System Sciences" }
+ @String{CompSysSci = "J. Comput. System Sci." }
+ @String{Computing = "Computing" }
+ @String{ContempMath = "Contemporary Mathematics" }
+ @String{ContempMath = "Contemp. Math." }
+ @String{Crelle = "Crelle's Journal" }
+ @String{GiornaleMath = "Giornale di Mathematiche" }
+ @String{GiornaleMath = "Giorn. Mat." } % didn't find in AMS MR., ibid.
+
+ %IEEE
+ @String{Computer = "{IEEE} Computer" }
+ @String{IEEETransComp = "{IEEE} Transactions on Computers" }
+ @String{IEEETransComp = "{IEEE} Trans. Comput." }
+ @String{IEEETransAC = "{IEEE} Transactions on Automatic Control" }
+ @String{IEEETransAC = "{IEEE} Trans. Automat. Control" }
+ @String{IEEESpec = "{IEEE} Spectrum" } % didn't find in AMS MR
+ @String{ProcIEEE = "Proceedings of the {IEEE}" }
+ @String{ProcIEEE = "Proc. {IEEE}" } % didn't find in AMS MR
+ @String{IEEETransAeroElec = "{IEEE} Transactions on Aerospace and Electronic
+     Systems" }
+ @String{IEEETransAeroElec = "{IEEE} Trans. Aerospace Electron. Systems" }
+
+ @String{IMANumerAna = "{IMA} Journal of Numerical Analysis" }
+ @String{IMANumerAna = "{IMA} J. Numer. Anal." }
+ @String{InfProcLet = "Information Processing Letters" }
+ @String{InfProcLet = "Inform. Process. Lett." }
+ @String{InstMathApp = "Journal of the Institute of Mathematics and
+     its Applications" }
+ @String{InstMathApp = "J. Inst. Math. Appl." }
+ @String{IntControl = "International Journal of Control" }
+ @String{IntControl = "Internat. J. Control" }
+ @String{IntNumerEng = "International Journal for Numerical Methods in
+     Engineering" }
+ @String{IntNumerEng = "Internat. J. Numer. Methods Engrg." }
+ @String{IntSuper = "International Journal of Supercomputing Applications" }
+ @String{IntSuper = "Internat. J. Supercomputing Applic." } % didn't find
+%% in AMS MR
+ @String{Kibernetika = "Kibernetika" }
+ @String{JResNatBurStand = "Journal of Research of the National Bureau
+     of Standards" }
+ @String{JResNatBurStand = "J. Res. Nat. Bur. Standards" }
+ @String{LinAlgApp = "Linear Algebra and its Applications" }
+ @String{LinAlgApp = "Linear Algebra Appl." }
+ @String{MathAnaAppl = "Journal of Mathematical Analysis and Applications" }
+ @String{MathAnaAppl = "J. Math. Anal. Appl." }
+ @String{MathAnnalen = "Mathematische Annalen" }
+ @String{MathAnnalen = "Math. Ann." }
+ @String{MathPhys = "Journal of Mathematical Physics" }
+ @String{MathPhys = "J. Math. Phys." }
+ @String{MathComp = "Mathematics of Computation" }
+ @String{MathComp = "Math. Comp." }
+ @String{MathScand = "Mathematica Scandinavica" }
+ @String{MathScand = "Math. Scand." }
+ @String{TablesAidsComp = "Mathematical Tables and Other Aids to Computation" }
+ @String{TablesAidsComp = "Math. Tables Aids Comput." }
+ @String{NumerMath = "Numerische Mathematik" }
+ @String{NumerMath = "Numer. Math." }
+ @String{PacificMath = "Pacific Journal of Mathematics" }
+ @String{PacificMath = "Pacific J. Math." }
+ @String{ParDistComp = "Journal of Parallel and Distributed Computing" }
+ @String{ParDistComp = "J. Parallel and Distrib. Comput." } % didn't find
+%% in AMS MR
+ @String{ParComputing = "Parallel Computing" }
+ @String{ParComputing = "Parallel Comput." }
+ @String{PhilMag = "Philosophical Magazine" }
+ @String{PhilMag = "Philos. Mag." }
+ @String{ProcNAS = "Proceedings of the National Academy of Sciences
+                    of the USA" }
+ @String{ProcNAS = "Proc. Nat. Acad. Sci. U. S. A." }
+ @String{Psychometrika = "Psychometrika" }
+ @String{QuartMath = "Quarterly Journal of Mathematics, Oxford, Series (2)" }
+ @String{QuartMath = "Quart. J. Math. Oxford Ser. (2)" }
+ @String{QuartApplMath = "Quarterly of Applied Mathematics" }
+ @String{QuartApplMath = "Quart. Appl. Math." }
+ @String{RevueInstStat = "Review of the International Statisical Institute" }
+ @String{RevueInstStat = "Rev. Inst. Internat. Statist." }
+
+ %SIAM
+ @String{JSIAM = "Journal of the Society for Industrial and Applied
+     Mathematics" }
+ @String{JSIAM = "J. Soc. Indust. Appl. Math." }
+ @String{JSIAMB = "Journal of the Society for Industrial and Applied
+     Mathematics, Series B, Numerical Analysis" }
+ @String{JSIAMB = "J. Soc. Indust. Appl. Math. Ser. B Numer. Anal." }
+ @String{SIAMAlgMeth = "{SIAM} Journal on Algebraic and Discrete Methods" }
+ @String{SIAMAlgMeth = "{SIAM} J. Algebraic Discrete Methods" }
+ @String{SIAMAppMath = "{SIAM} Journal on Applied Mathematics" }
+ @String{SIAMAppMath = "{SIAM} J. Appl. Math." }
+ @String{SIAMComp = "{SIAM} Journal on Computing" }
+ @String{SIAMComp = "{SIAM} J. Comput." }
+ @String{SIAMMatrix = "{SIAM} Journal on Matrix Analysis and Applications" }
+ @String{SIAMMatrix = "{SIAM} J. Matrix Anal. Appl." }
+ @String{SIAMNumAnal = "{SIAM} Journal on Numerical Analysis" }
+ @String{SIAMNumAnal = "{SIAM} J. Numer. Anal." }
+ @String{SIAMReview = "{SIAM} Review" }
+ @String{SIAMReview = "{SIAM} Rev." }
+ @String{SIAMSciStat = "{SIAM} Journal on Scientific and Statistical
+     Computing" }
+ @String{SIAMSciStat = "{SIAM} J. Sci. Statist. Comput." }
+
+ @String{SoftPracExp = "Software Practice and Experience" }
+ @String{SoftPracExp = "Software Prac. Experience" } % didn't find in AMS MR
+ @String{StatScience = "Statistical Science" }
+ @String{StatScience = "Statist. Sci." }
+ @String{Techno = "Technometrics" }
+ @String{USSRCompMathPhys = "{USSR} Computational Mathematics and Mathematical
+     Physics" }
+ @String{USSRCompMathPhys = "{U. S. S. R.} Comput. Math. and Math. Phys." }
+ @String{VLSICompSys = "Journal of {VLSI} and Computer Systems" }
+ @String{VLSICompSys = "J. {VLSI} Comput. Syst." }
+ @String{ZAngewMathMech = "Zeitschrift fur Angewandte Mathematik und
+     Mechanik" }
+ @String{ZAngewMathMech = "Z. Angew. Math. Mech." }
+ @String{ZAngewMathPhys = "Zeitschrift fur Angewandte Mathematik und Physik" }
+ @String{ZAngewMathPhys = "Z. Angew. Math. Phys." }
+
+% Publishers % ================================================= |
+
+ @String{Academic = "Academic Press" }
+ @String{ACMPress = "{ACM} Press" }
+ @String{AdamHilger = "Adam Hilger" }
+ @String{AddisonWesley = "Addison-Wesley" }
+ @String{AllynBacon = "Allyn and Bacon" }
+ @String{AMS = "American Mathematical Society" }
+ @String{Birkhauser = "Birkha{\"u}ser" }
+ @String{CambridgePress = "Cambridge University Press" }
+ @String{Chelsea = "Chelsea" }
+ @String{ClaredonPress = "Claredon Press" }
+ @String{DoverPub = "Dover Publications" }
+ @String{Eyolles = "Eyolles" }
+ @String{HoltRinehartWinston = "Holt, Rinehart and Winston" }
+ @String{Interscience = "Interscience" }
+ @String{JohnsHopkinsPress = "The Johns Hopkins University Press" }
+ @String{JohnWileySons = "John Wiley and Sons" }
+ @String{Macmillan = "Macmillan" }
+ @String{MathWorks = "The Math Works Inc." }
+ @String{McGrawHill = "McGraw-Hill" }
+ @String{NatBurStd = "National Bureau of Standards" }
+ @String{NorthHolland = "North-Holland" }
+ @String{OxfordPress = "Oxford University Press" }  %address Oxford or London?
+ @String{PergamonPress = "Pergamon Press" }
+ @String{PlenumPress = "Plenum Press" }
+ @String{PrenticeHall = "Prentice-Hall" }
+ @String{SIAMPub = "{SIAM} Publications" }
+ @String{Springer = "Springer-Verlag" }
+ @String{TexasPress = "University of Texas Press" }
+ @String{VanNostrand = "Van Nostrand" }
+ @String{WHFreeman = "W. H. Freeman and Co." }
+
+%Entries
+
+@inproceedings{breslau1999web,
+  title={Web caching and Zipf-like distributions: Evidence and implications},
+  author={Breslau, Lee and Cao, Pei and Fan, Li and Phillips, Graham and Shenker, Scott},
+  booktitle={INFOCOM'99. Eighteenth Annual Joint Conference of the IEEE Computer and Communications Societies. Proceedings. IEEE},
+  volume={1},
+  pages={126--134},
+  year={1999},
+  organization={IEEE}
+}
+
+@inproceedings{karakostas2002exploitation,
+  title={Exploitation of different types of locality for web caches},
+  author={Karakostas, George and Serpanos, Dimitrios N},
+  booktitle={Computers and Communications, 2002. Proceedings. ISCC 2002. Seventh International Symposium on},
+  pages={207--212},
+  year={2002},
+  organization={IEEE}
+}
+
+@inproceedings{einziger2014tinylfu,
+  title={Tinylfu: A highly efficient cache admission policy},
+  author={Einziger, Gil and Friedman, Roy},
+  booktitle={Parallel, Distributed and Network-Based Processing (PDP), 2014 22nd Euromicro International Conference on},
+  pages={146--153},
+  year={2014},
+  organization={IEEE}
+}
+
+@article{dimitropoulos2008eternal,
+  title={The eternal sunshine of the sketch data structure},
+  author={Dimitropoulos, Xenofontas and Stoecklin, Marc and Hurley, Paul and Kind, Andreas},
+  journal={Computer Networks},
+  volume={52},
+  number={17},
+  pages={3248--3257},
+  year={2008},
+  publisher={Elsevier}
+}
+
+@article{bloom1970space,
+  title={Space/time trade-offs in hash coding with allowable errors},
+  author={Bloom, Burton H},
+  journal={Communications of the ACM},
+  volume={13},
+  number={7},
+  pages={422--426},
+  year={1970},
+  publisher={ACM}
+}
+
+@article{fan2000summary,
+  title={Summary cache: a scalable wide-area web cache sharing protocol},
+  author={Fan, Li and Cao, Pei and Almeida, Jussara and Broder, Andrei Z},
+  journal={IEEE/ACM Transactions on Networking (TON)},
+  volume={8},
+  number={3},
+  pages={281--293},
+  year={2000},
+  publisher={IEEE Press}
+}
+
+@article{cormode2005improved,
+  title={An improved data stream summary: the count-min sketch and its applications},
+  author={Cormode, Graham and Muthukrishnan, Shan},
+  journal={Journal of Algorithms},
+  volume={55},
+  number={1},
+  pages={58--75},
+  year={2005},
+  publisher={Elsevier}
+}
+
+@inproceedings{cohen2003spectral,
+  title={Spectral bloom filters},
+  author={Cohen, Saar and Matias, Yossi},
+  booktitle={Proceedings of the 2003 ACM SIGMOD international conference on Management of data},
+  pages={241--252},
+  year={2003},
+  organization={ACM}
+}
+
+@article{arlitt2000evaluating,
+title={Evaluating content management techniques for web proxy caches},
+author={Arlitt, Martin and Cherkasova, Ludmila and Dilley, John and Friedrich, Rich and Jin, Tai},
+journal={ACM SIGMETRICS Performance Evaluation Review},
+volume={27},
+number={4},
+pages={3--11},
+year={2000},
+publisher={ACM}
+}
+@misc{ zettair07,
+    author = {Zettair},
+    title = {The \uppercase{Z}ettair search engine},
+    howpublished = {http://www.seg.rmit.edu.au/zettair/},
+    year = {2007}
+}
+
+@inproceedings{Altingovde11,
+ author = {Altingovde, I. Sengor and Ozcan, Rifat and Cambazoglu, B. Barla and Ulusoy, \"{O}zg\"{u}r},
+ title = {Second chance: a hybrid approach for dynamic result caching in search engines},
+ booktitle = {Proc. of ECIR 2011},
+ year = {2011},
+ isbn = {978-3-642-20160-8},
+ location = {Dublin, Ireland},
+ pages = {510--516},
+ numpages = {7},
+ url = {http://dl.acm.org/citation.cfm?id=1996889.1996955},
+ acmid = {1996955},
+ publisher = {Springer-Verlag},
+ keywords = {query processing, result cache, search engines},
+} 
+
+@inproceedings{Qureshi09,
+ author = {Qureshi, Asfandyar and Weber, Rick and Balakrishnan, Hari and Guttag, John and Maggs, Bruce},
+ title = {Cutting the electric bill for internet-scale systems},
+ booktitle = {Proc. of SIGCOMM 2009},
+ year = {2009},
+ isbn = {978-1-60558-594-9},
+ location = {Barcelona, Spain},
+ pages = {123--134},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/1592568.1592584},
+ doi = {10.1145/1592568.1592584},
+ acmid = {1592584},
+ publisher = {ACM},
+ keywords = {cloud computing, electricity markets, traffic engineering},
+} 
+
+@inproceedings{Marin10NewCaching,
+ author = {Marin, Mauricio and Gil-Costa, Veronica and Gomez-Pantoja, Carlos},
+ title = {New caching techniques for web search engines},
+ booktitle = {Proc. of HPDC 2010},
+ year = {2010},
+ isbn = {978-1-60558-942-8},
+ location = {Chicago, Illinois},
+ pages = {215--226},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/1851476.1851502},
+ doi = {10.1145/1851476.1851502},
+ acmid = {1851502},
+ publisher = {ACM},
+ keywords = {caching strategies, discrete-event simulation, models for parallel computing, query processing, web search engines},
+} 
+
+@inproceedings{Kayaaslan11Energy,
+ author = {Kayaaslan, Enver and Cambazoglu, B. Barla and Blanco, Roi and Junqueira, Flavio P. and Aykanat, Cevdet},
+ title = {Energy-price-driven query processing in multi-center web search engines},
+ booktitle = {Proc. of SIGIR 2011},
+ year = {2011},
+ isbn = {978-1-4503-0757-4},
+ location = {Beijing, China},
+ pages = {983--992},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2009916.2010047},
+ doi = {10.1145/2009916.2010047},
+ acmid = {2010047},
+ publisher = {ACM},
+ keywords = {data center, energy, query processing, web search engine},
+} 
+
+@INPROCEEDINGS{pass06Picture,
+  author = {G.~Pass and A.~Chowdhury and C.~Torgeson},
+  title = {A picture of search},
+  booktitle = {Proc. of InfoScale 2006},
+  year = {2006},
+  pages = {1}
+}
+
+@INPROCEEDINGS{cao97Cost,
+  author = {P.~Cao and S.~Irani},
+  title = {Cost-aware WWW proxy caching algorithms},
+  booktitle = {Proceedings of the USENIX Symposium on Internet Technologies and Systems},
+  year = {1997},
+  pages = {18--18}
+}
+
+@ARTICLE{arlitt00Evaluating,
+  author = {M.~F.~Arlitt and L.~Cherkasova, J.~Dilley, R.~J.~Friedrich and T.~Y.~Jin},
+  title = {Evaluating content management techniques for Web proxy caches},
+  journal = {{ACM} SIGMETRICS Perform. Eval. Rev.},
+  year = {2000},
+  volume = {27},
+  pages = {3--11},
+  number = {4}
+}
+
+@incollection{Cambazoglu11,
+  author = {Cambazoglu, Berkant Barla and Baeza-Yates, Ricardo},
+  title = {Scalability challenges in web search engines},
+  booktitle = {Advanced Topics in Information Retrieval},
+  series = {The Information Retrieval Series},
+  editor = {Melucci, Massimo and Baeza-Yates, Ricardo and Croft, W. Bruce},
+  publisher = {Springer Berlin Heidelberg},
+  pages = {27-50},
+  volume = {33},
+  year = {2011}
+}
+
+@article{Barroso03,
+ author = {Barroso, Luiz Andr\'{e} and Dean, Jeffrey and H\"{o}lzle, Urs},
+ title = {Web search for a planet: the {G}oogle cluster architecture},
+ journal = {IEEE Micro},
+ volume = {23},
+ number = {2},
+ year = {2003},
+ pages = {22--28},
+}
+
+@inproceedings{Cambazoglu09,
+ author = {Cambazoglu, B Barla and Plachouras, Vassilis and Baeza-Yates, Ricardo},
+ title = {Quantifying performance and quality gains in distributed web search engines},
+ booktitle = {Proc. 32nd Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ year = {2009},
+ pages = {411--418},
+}
+
+@inproceedings{Anh05,
+ author = {Anh, Vo Ngoc and Moffat, Alistair},
+ title = {Simplified similarity scoring using term ranks},
+ booktitle = {Proc. 28th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ year = {2005},
+ pages = {226--233},
+}
+
+@incollection{Ounis05,
+ author = {Ounis, Iadh and Amati, Gianni and Plachouras, Vassilis and He, Ben and Macdonald, Craig and Johnson,
+Douglas},
+ title = {Terrier information retrieval platform},
+ booktitle = {Advances in Information Retrieval},
+ series = {Lecture Notes in Computer Science},
+ editor = {Losada, David E. and Fern\'{a}ndez-Luna, Juan M.},
+ publisher = {Springer Berlin / Heidelberg},
+ volume = {3408},
+ pages = {517--519},
+ year = {2005},
+}
+
+@inproceedings{Ding11,
+ author = {Ding, Shuai and Gollapudi, Sreenivas and Ieong, Samuel and Kenthapadi, Krishnaram and Ntoulas, Alexandros},
+ title = {Indexing strategies for graceful degradation of search quality},
+ booktitle = {Proc. 34th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ year = {2011},
+ pages = {575--584},
+} 
+
+@inproceedings{Cambazoglu10,
+ author = {Cambazoglu, Berkant Barla and Junqueira, Flavio P. and Plachouras, Vassilis and Banachowski, Scott and Cui, Baoqiu and Lim, Swee and Bridge, Bill},
+ title = {A refreshing perspective of search engine caching},
+ booktitle = {Proc. 19th Int'l Conf. World Wide Web},
+ pages = {181--190},
+ year = {2010}
+}
+
+@inproceedings{Cambazoglu10-3,
+ author = {Cambazoglu, B. B. and Zaragoza, H. and Chapelle, O. and Chen, J. and Liao, C. and Zheng, Z. and Degenhardt, J.},
+ title = {Early exit optimizations for additive machine learned ranking systems},
+ booktitle = {Proc. 3rd ACM Int'l Conf. Web Search and Data Mining},
+ pages = {411--420},
+ year = {2010}
+}
+
+@inproceedings{Gan09,
+ author = {Gan, Qingqing and Suel, Torsten},
+ title = {Improved techniques for result caching in web search engines},
+ booktitle = {Proc. of WWW 2009},
+ pages = {431--440},
+ year = {2009},
+}
+
+@article{Ozcan11,
+ author = {Ozcan, Rifat and Altingovde, Ismail Sengor and Ulusoy, \"{O}zg\"{u}r},
+ title = {Cost-aware strategies for query result caching in web search engines},
+ journal = {ACM Trans. Web},
+ volume = {5},
+ issue = {2},
+ year = {2011},
+} 
+
+@inproceedings{Baeza-Yates07,
+ author = {Baeza-Yates, Ricardo and Gionis, Aristides and Junqueira, Flavio and Murdock, Vanessa and Plachouras, Vassilis and Silvestri, Fabrizio},
+ title = {The impact of caching on search engines},
+ booktitle = {Proc. of SIGIR 2007},
+ year = {2007},
+ pages = {183--190},
+} 
+
+@article{Fagni06,
+ author = {Fagni, Tiziano and Perego, Raffaele and Silvestri, Fabrizio and Orlando, Salvatore},
+ title = {Boosting the performance of web search engines: caching and prefetching query results by exploiting historical usage data},
+ journal = {ACM Trans. Inf. Syst.},
+ volume = {24},
+ issue = {1},
+ year = {2006},
+ pages = {51--78},
+} 
+
+@inproceedings{Lempel03,
+ author = {Lempel, Ronny and Moran, Shlomo},
+ title = {Predictive caching and prefetching of query results in search engines},
+ booktitle = {Proc. 12th Int'l Conf. World Wide Web},
+ year = {2003},
+ pages = {19--28},
+} 
+
+@inproceedings{Long05,
+ author = {Long, Xiaohui and Suel, Torsten},
+ title = {Three-level caching for efficient query processing in large web search engines},
+ booktitle = {Proc. 14th Int'l Conf. World Wide Web},
+ year = {2005},
+ pages = {257--266},
+} 
+
+@inproceedings{Marin10,
+ author = {Marin, Mauricio and Gil-Costa, Veronica and Gomez-Pantoja, Carlos},
+ title = {New caching techniques for web search engines},
+ booktitle = {Proc. 19th ACM Int'l Symp. High Performance Distributed Computing},
+ year = {2010},
+ pages = {215--226},
+} 
+
+@inproceedings{Anagnostopoulos11,
+ author = {Anagnostopoulos, Aris and Becchetti, Luca and Leonardi, Stefano and Mele, Ida and Sankowski, Piotr},
+ title = {Stochastic query covering},
+ booktitle = {Proc. 4th ACM Int'l Conf. Web Search and Data Mining},
+ year = {2011},
+ pages = {725--734},
+} 
+
+
+@article{Ozcan11-2,
+ author = {Rifat Ozcan and I. Sengor Altingovde and B. Barla Cambazoglu and Flavio P. Junqueira and \"{O}zg\"{u}r Ulusoy},
+ title = {A five-level static cache architecture for web search engines},
+ journal = {Inf. Process. Manage.},
+ year = {2011},
+ note = {in press},
+}
+
+% static index pruning
+@inproceedings{Buttcher06,
+ author = {B\"{u}ttcher, Stefan and Clarke, Charles L. A.},
+ title = {A document-centric approach to static index pruning in text retrieval systems},
+ booktitle = {Proc. 15th ACM Int'l Conf. Information and Knowledge Management},
+ year = {2006},
+ pages = {182--189},
+} 
+
+@inproceedings{Skobeltsyn08,
+ author = {Skobeltsyn, Gleb and Junqueira, Flavio and Plachouras, Vassilis and Baeza-Yates, Ricardo},
+ title = {Res{I}n: a combination of results caching and index pruning for high-performance web search engines},
+ booktitle = {Proc. 31st Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ pages = {131--138},
+ year = {2008}
+} 
+
+@inproceedings{Ntoulas07,
+ author = {Ntoulas, Alexandros and Cho, Junghoo},
+ title = {Pruning policies for two-tiered inverted index with correctness guarantee},
+ booktitle = {Proc. 30th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ year = {2007},
+ pages = {191--198},
+ }
+
+@inproceedings{Carmel01,
+ author = {Carmel, David and Cohen, Doron and Fagin, Ronald and Farchi, Eitan and Herscovici, Michael and Maarek, Yoelle S. and Soffer, Aya},
+ title = {Static index pruning for information retrieval systems},
+ booktitle = {Proc. 24th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ year = {2001},
+ pages = {43--50},
+} 
+
+@article{Blanco10,
+ author = {Blanco, Roi and Barreiro, Alvaro},
+ title = {Probabilistic static pruning of inverted files},
+ journal = {ACM Trans. Inf. Syst.},
+ volume = {28},
+ issue = {1},
+ year = {2010},
+ pages = {1:1--1:33},
+} 
+
+% index tiering
+@inproceedings{Risvik03,
+ author = {Risvik, Knut Magne and Aasheim, Yngve and Lidal, Mathias},
+ title = {Multi-tier architecture for web search engines},
+ booktitle = {Proc. 1st Conf. Latin American Web Congress},
+ year = {2003},
+ pages = {132--143},
+} 
+
+@article{Leung11,
+ author = {Leung, G and Quadrianto, Novi and Smola, Aj and Tsioutsiouliklis, K},
+ title = {Optimal web-scale tiering as a flow problem},
+ journal = {Advances in Neural Information Processing Systems}, 
+ year = {2011},
+ volume = {23},
+ pages = {1--9}
+}
+
+% inverted index partitioning
+@inproceedings{Badue01,
+ author = {Badue, Claudine and Ribeiro-Neto, Berthier and Baeza-Yates, Ricardo and Ziviani, Nivio},
+ title = {Distributed query processing using partitioned inverted files},
+ booktitle = {Proc. 8th Int'l Symp. String Processing and Information Retrieval}, 
+ pages = {10--20},
+ year = {2001},
+}
+
+@inproceedings{Feuerstein09,
+ author = {Feuerstein, Esteban and Mar\'{\i}n, Mauricio and Mizrahi, Michel and Costa, Veronica Gil and Baeza-Yates, Ricardo A.},
+ title = {Two-dimensional distributed inverted files},
+ booktitle = {Proc. 16th Int'l Symp. String Processing and Information Retrieval},
+ pages = {206--213},
+ year = {2009}
+}
+
+@article{Jeong95,
+ author = {Jeong, Byeong-Soo and Omiecinski, Edward},
+ title = {Inverted file partitioning schemes in multiple disk systems},
+ journal = {IEEE Trans. Parallel Distrib. Syst.},
+ volume = {6},
+ number = {2},
+ pages = {142--153},
+ year = {1995}
+}
+
+@inproceedings{Lucchese07,
+ author = {Lucchese, Claudio and Orlando, Salvatore and Perego, Raffaele and Silvestri, Fabrizio},
+ title = {Mining query logs to optimize index partitioning in parallel web search engines},
+ booktitle = {Proc. 2nd Int'l Conf. Scalable Information Systems},
+ pages = {43:1--43:9},
+ year = {2007}
+}
+
+@inproceedings{MacFarlane00,
+ author = {MacFarlane, Andy and McCann, Julia A. and Robertson, Stephen E.},
+ title = {Parallel search using partitioned inverted files},
+ booktitle = {Proc. 7th Int'l Symp. String Processing and Information Retrieval},
+ pages = {209--220},
+ year = {2000}
+}
+
+@inproceedings{Moffat06,
+ author = {Moffat, Alistair and Webber, William and Zobel, Justin},
+ title = {Load balancing for term-distributed parallel retrieval},
+ booktitle = {Proc. 29th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ pages = {348--355},
+ year = {2006}
+}
+
+@inproceedings{Ribeiro-Neto98,
+ author = {Ribeiro-Neto, Berthier A. and Barbosa, Ramurti A.},
+ title = {Query performance for tightly coupled distributed digital libraries},
+ booktitle = {Proc. 3rd ACM Conf. Digital Libraries},
+ pages = {182--190},
+ year = {1998}
+}
+
+@inproceedings{Tomasic93,
+ author = {Tomasic, Anthony and Garcia-Molina, Hector},
+ title = {Performance of inverted indices in shared-nothing distributed text document information retrieval systems},
+ booktitle = {Proc. 2nd Int'l Conf. Parallel and Distributed Information Systems},
+ pages = {8--17},
+ year = {1993}
+}
+
+@inproceedings{Zhang07,
+ author={Zhang, Jiangong and Suel, Torsten},
+ title={Optimized inverted list assignment in distributed search engine architectures},
+ booktitle={Proc. 23rd IEEE Int'l Parallel and Distributed Processing Symp.},
+ pages={1--10},
+ year={2007}
+}
+
+% collection selection
+@INPROCEEDINGS{Callan95,
+	AUTHOR = "J. P. Callan and Z. Lu and W. B. Croft",
+	TITLE = "Searching distributed collections with inference networks",
+	BOOKTITLE = "Proc. 18th Int'l ACM SIGIR Conf. on Research and Development in Information Retrieval",
+	PAGES = "339-348",
+	ORGANIZATION = "",
+	MONTH = "", 
+	YEAR = {1995}}
+
+@INPROCEEDINGS{Si03,
+	AUTHOR = "L. Si and J. Callan",
+	TITLE = "Relevant document distribution estimation method for resource selection",
+	BOOKTITLE = "Proc. 26th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "298-305",
+	ORGANIZATION = "",
+	MONTH = "", 
+	YEAR = {2003}}
+
+@INPROCEEDINGS{DSouza00,
+	AUTHOR = "D. D'Souza and J. Thom and J. Zobel",
+	TITLE = "A comparison of techniques for selecting text collections",
+	BOOKTITLE = "Proc. 11th Australasian Database Conf.",
+	PAGES = "28-32",
+	ORGANIZATION = "",
+	MONTH = "",
+	YEAR = {2000}}
+
+@INPROCEEDINGS{French99,
+	AUTHOR = "J. C. French and A. L. Powell and J. Callan and C. L. Viles and T. Emmitt and K. J. Prey and Y. Mou",
+	TITLE = "Comparing the performance of database selection algorithms",
+	BOOKTITLE = "Proc. 26th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "238-245",
+	ORGANIZATION = "",
+	MONTH = "",
+	YEAR = {1999}}
+
+@INPROCEEDINGS{Powell00,
+	AUTHOR = "A.L. Powell and J.C. French and J. Callan and M. Connell and C.L. Viles",
+	TITLE = "The impact of database selection on distributed searching",
+	BOOKTITLE = "Proc. 23rd Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "232-239",
+	ORGANIZATION = "",
+	MONTH = "",
+	YEAR = {2000}}
+
+@INPROCEEDINGS{Nottelmann03,
+	AUTHOR = " H. Nottelmann and N. Fuhr",
+	TITLE = "Evaluating different method of estimating retrieval quality for resource selection",
+	BOOKTITLE = "Proc. 26th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "290-297",
+	ORGANIZATION = "",
+	MONTH = "",
+	YEAR = {2003}}
+
+@inproceedings{Arguello09,
+ author = {Arguello, Jaime and Callan, Jamie and Diaz, Fernando},
+ title = {Classification-based resource selection},
+ booktitle = {Proc. 18th ACM Conf. Information and Knowledge Management},
+ year = {2009},
+ pages = {1277--1286},
+} 
+
+@inproceedings{Baeza-Yates09,
+ author = {Baeza-Yates, Ricardo and Murdock, Vanessa and Hauff, Claudia},
+ title = {Efficiency trade-offs in two-tier web search systems},
+ booktitle = {Proc. 32nd Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ year = {2009},
+ pages = {163--170},
+} 
+
+@inproceedings{Cambazoglu10-2,
+ author = {Cambazoglu, B. Barla and Varol, Emre and Kayaaslan, Enver and Aykanat, Cevdet and Baeza-Yates, Ricardo},
+ title = {Query forwarding in geographically distributed search engines},
+ booktitle = {Proc. 33rd Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ year = {2010},
+ pages = {90--97},
+}
+
+@inproceedings{Lu99,
+ author = {Lu, Zhihong and McKinley, Kathryn S.},
+ title = {Partial replica selection based on relevance for information retrieval},
+ booktitle = {Proc. 22nd Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ year = {1999},
+ pages = {97--104},
+}
+
+@INPROCEEDINGS{Voorhees95,
+ author = {Ellen M. Voorhees and Narendra K. Gupta and Ben Johnson-laird},
+ title = {The collection fusion problem},
+ booktitle = {Proc. 3rd Text Retrieval Conf.},
+ year = {1995},
+ pages = {95--104}
+}
+
+@inproceedings{Brefeld11,
+ author = {Brefeld, Ulf and Cambazoglu, B. Barla and Junqueira, Flavio P.},
+ title = {Document assignment in multi-site search engines},
+ booktitle = {Proc. 4th ACM Int'l Conf. Web Search and Data Mining},
+ year = {2011},
+ pages = {575--584},
+}
+
+@inproceedings{Blanco11,
+ author = {Blanco, Roi and Cambazoglu, B. Barla and Junqueira, Flavio P. and Leroy, Vincent and Kelly, Ivan},
+ title = {Assigning documents to master sites in distributed search},
+ booktitle = {Proc. 20th ACM Int'l Conf. Information and Knowledge Management},
+ year = {accepted},
+ pages = {},
+}
+
+@inproceedings{Kulkarni10,
+ author = {Kulkarni, Anagha and Callan, Jamie},
+ title = {Document allocation policies for selective searching of distributed indexes},
+ booktitle = {Proc. 19th ACM Int'l Conf. Information and Knowledge Management},
+ year = {2010},
+ pages = {449--458},
+} 
+
+@article{Puppin10,
+ author = {Puppin, Diego and Silvestri, Fabrizio and Perego, Raffaele and Baeza-Yates, Ricardo},
+ title = {Tuning the capacity of search engines: Load-driven routing and incremental caching to reduce and balance the load},
+ journal = {ACM Trans. Inf. Syst.},
+ volume = {28},
+ issue = {2},
+ year = {2010},
+ pages = {5:1--5:36},
+} 
+
+% inverted index early exits
+@INPROCEEDINGS{Buckley85,
+	AUTHOR = "C. Buckley and A. Lewit",
+	TITLE = "Optimizations of inverted vector searches",
+	BOOKTITLE = "Proc. 8th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "97-110",
+	ORGANIZATION = "",
+	MONTH = "",
+	YEAR = {1985}}
+
+@ARTICLE{Moffat94,
+	AUTHOR = "A. Moffat and J. Zobel and R. Sacks-Davis",
+	TITLE = "Memory efficient ranking",
+	JOURNAL = {Inf. Process. Manage.},
+	VOLUME = {30},
+	NUMBER = {6},
+	PAGES = {733-744},
+	MONTH = "",
+	YEAR = {1994}}
+
+@INPROCEEDINGS{Persin94,
+	AUTHOR = "M. Persin",
+	TITLE = "Document filtering for fast ranking",
+	BOOKTITLE = "Proc. 17th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "339-348",
+	ORGANIZATION = "",
+	MONTH = "", 
+	YEAR = {1994}}
+
+@ARTICLE{Turtle95,
+	AUTHOR = "H. Turtle and J. Flood",
+	TITLE = "Query evaluation: strategies and optimizations",
+	JOURNAL = {Inf. Process. Manage.},
+	VOLUME = {31},
+	NUMBER = {6},
+	PAGES = {831-850},
+	MONTH = "",
+	YEAR = {1995}}
+
+@INPROCEEDINGS{Brown95,
+	AUTHOR = "E. W. Brown",
+	TITLE = "Fast evaluation of structured queries for information retrieval",
+	BOOKTITLE = "Proc. 18th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "30-38",
+	ORGANIZATION = "",
+	MONTH = "", 
+	YEAR = {1995}}
+
+@ARTICLE{Moffat96,
+	AUTHOR = "A. Moffat and J. Zobel",
+	TITLE = "Self-indexing inverted files for fast text retrieval",
+	JOURNAL = {ACM Trans. Inf. Syst.},
+	VOLUME = {14},
+	NUMBER = {4},
+	PAGES = {349-379},
+	MONTH = "",
+	YEAR = {1996}}
+
+@INPROCEEDINGS{Anh01,
+	AUTHOR = "V. N. Anh and O. Kretser and A. Moffat",
+	TITLE = "Vector-space ranking with effective early termination",
+	BOOKTITLE = "Proc. 24th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "35-42",
+	ORGANIZATION = "",
+	MONTH = "", 
+	YEAR = {2001}}
+
+@INPROCEEDINGS{Strohman05,
+	AUTHOR = "T. Strohman and H. Turtle  and W. B. Croft",
+	TITLE = "Optimization strategies for complex queries",
+	BOOKTITLE = "Proc. 28th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "219-225",
+	ORGANIZATION = "",
+	MONTH = "", 
+	YEAR = {2005}}
+
+@INPROCEEDINGS{Anh06,
+	AUTHOR = "V. N. Anh and A. Moffat",
+	TITLE = "Pruned query evaluation using pre-computed impacts",
+	BOOKTITLE = "Proc. 29th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval",
+	PAGES = "372-379",
+	ORGANIZATION = "",
+	MONTH = "", 
+	YEAR = {2006}}
+@inproceedings{Bai12,
+ author = {Bai, Xiao and Junqueira, Flavio P.},
+ title = {Online result cache invalidation for real-time web search},
+ booktitle = {SIGIR 2012},
+ year = {2012},
+ pages = {641--650},
+}
+
+@inproceedings{Jonassen12,
+ author = {Jonassen, Simon and Cambazoglu, B. Barla and Silvestri, Fabrizio},
+ title = {Prefetching query results and its impact on search engines},
+ booktitle = {Proc. of SIGIR 2012},
+ year = {2012},
+ pages = {631--640},
+}
+
+@inproceedings{Ding11,
+ author = {Ding, Shuai and Attenberg, Josh and Baeza-Yates, Ricardo and Suel, Torsten},
+ title = {Batch query processing for web search engines},
+ booktitle = {Proc. 4th ACM Int'l Conf. Web Search and Data Mining},
+ year = {2011},
+ pages = {137--146},
+}
+
+@article{Barroso03,
+ author = {Barroso, Luiz Andr\'{e} and Dean, Jeffrey and H\"{o}lzle, Urs},
+ title = {Web search for a planet: the {G}oogle cluster architecture},
+ journal = {IEEE Micro},
+ volume = {23},
+ number = {2},
+ year = {2003},
+ pages = {22--28},
+ }
+
+@inproceedings{Ceccarelli11,
+  author    = {Diego Ceccarelli and
+               Claudio Lucchese and
+               Salvatore Orlando and
+               Raffaele Perego and
+               Fabrizio Silvestri},
+  title     = {Caching query-biased snippets for efficient retrieval},
+  booktitle = {EDBT},
+  year      = {2011},
+  pages     = {93-104},
+}
+@inproceedings{Alici11,
+ author = {Alici, Sadiye and Altingovde, Ismail Sengor and Ozcan, Rifat and Cambazoglu, Berkant Barla and Ulusoy, \"{O}zg\"{u}r},
+ title = {Timestamp-based result cache invalidation for web search engines},
+ booktitle = {Proc. of SIGIR 2011},
+ pages = {973--982},
+ year = {2011},
+}
+
+@inproceedings{Alici12,
+ author = {Alici, Sadiye and Altingovde, Ismail Sengor and Ozcan, Rifat and Cambazoglu, Berkant Barla and Ulusoy, \"{O}zg\"{u}r},
+ title = {Adaptive time-to-live strategies for query result caching in web search engines},
+ booktitle = {Proc. of ECIR 2012},
+ pages = {401-412},
+ year = {2012},
+}
+
+@inproceedings{Altingovde11,
+ author = {Altingovde, I. Sengor and Ozcan, Rifat and Cambazoglu, B. Barla and Ulusoy, \"{O}zg\"{u}r},
+ title = {Second chance: a hybrid approach for dynamic result caching in search engines},
+ booktitle = {Proc. of ECIR 2011},
+ pages = {510--516},
+ year = {2011},
+}
+
+@incollection{Baeza-Yates03,
+ author = {Baeza-Yates, Ricardo and Saint-Jean, Felipe},
+ title = {A three level search engine index based in query log distribution},
+ booktitle = {String Processing and Information Retrieval},
+ series = {Lecture Notes in Computer Science},
+ editor = {Nascimento, Mario A. and de Moura, Edleno S. and Oliveira, Arlindo L.},
+ publisher = {Springer Berlin / Heidelberg},
+ volume = {2857},
+ pages = {56--65},
+ year = {2003},
+ }
+
+@incollection{Baeza-Yates07,
+ author = {Baeza-Yates, Ricardo and Junqueira, Flavio and Plachouras, Vassilis and Witschel, Hans},
+ title = {Admission policies for caches of search engine results},
+ booktitle = {SPIRE 2007},
+ series = {LNCS},
+ %editor = {Ziviani, Nivio and Baeza-Yates, Ricardo},
+ %publisher = {Springer Berlin / Heidelberg},
+ %volume = {4726},
+ pages = {74--85},
+ year = {2007},
+ }
+
+@inproceedings{Baeza-Yates07-2,
+ author = {Baeza-Yates, Ricardo and Gionis, Aristides and Junqueira, Flavio and Murdock, Vanessa and Plachouras, Vassilis and Silvestri, Fabrizio},
+ title = {The impact of caching on search engines},
+ booktitle = {Proc. of SIGIR 2007},
+ pages = {183--190},
+ year = {2007},
+ }
+
+@inproceedings{Blanco10,
+ author = {Blanco, Roi and Bortnikov, Edward and Junqueira, Flavio and Lempel, Ronny and Telloli, Luca and Zaragoza, Hugo},
+ title = {Caching search engine results over incremental indices},
+ booktitle = {Proc. of SIGIR 2010},
+ pages = {82--89},
+ year = {2010},
+ }
+
+@inproceedings{Bortnikov11,
+ author = {Bortnikov, Edward and Lempel, Ronny and Vornovitsky, Kolman},
+ title = {Caching for realtime search},
+ booktitle = {Proc. of ECIR 2011},
+ pages = {104--116},
+ year = {2011},
+}
+
+@inproceedings{Cambazoglu10,
+ author = {Cambazoglu, Berkant Barla and Junqueira, Flavio P. and Plachouras, Vassilis and Banachowski, Scott and Cui, Baoqiu and Lim,
+Swee and Bridge, Bill},
+ title = {A refreshing perspective of search engine caching},
+ booktitle = {Proc. of WWW 2010},
+ pages = {181--190},
+ year = {2010},
+ }
+
+@incollection{Cambazoglu11,
+ author = {Cambazoglu, Berkant Barla and Baeza-Yates, Ricardo},
+ title = {Scalability challenges in web search engines},
+ booktitle = {Advanced Topics in Information Retrieval},
+ series = {The Information Retrieval Series},
+ editor = {Melucci, Massimo and Baeza-Yates, Ricardo and Croft, W. Bruce},
+ publisher = {Springer Berlin Heidelberg},
+ volume = {33},
+ pages = {27-50},
+ year = {2011},
+ }
+
+@inproceedings{Chowdhury03,
+ author = {Chowdhury, Abdur and Pass, Greg},
+ title = {Operational requirements for scalable search systems},
+ booktitle = {Proc. 12th Int'l Conf. Information and Knowledge Management},
+ pages = {435--442},
+ year = {2003},
+ }
+
+@article{Fagni06,
+ author = {Fagni, Tiziano and Perego, Raffaele and Silvestri, Fabrizio and Orlando, Salvatore},
+ title = {Boosting the performance of web search engines: Caching and prefetching query results by exploiting historical usage data},
+ journal = {ACM Trans. Information Systems},
+ volume = {24},
+ number = {1},
+ pages = {51--78},
+ year = {2006},
+ }
+
+@inproceedings{Gan09,
+ author = {Gan, Qingqing and Suel, Torsten},
+ title = {Improved techniques for result caching in web search engines},
+ booktitle = {Proc. of WWW 2009},
+ pages = {431--440},
+ year = {2009},
+ }
+
+@inproceedings{Lempel03,
+ author = {Lempel, Ronny and Moran, Shlomo},
+ title = {Predictive caching and prefetching of query results in search engines},
+ booktitle = {Proc. of WWW 2003},
+ pages = {19--28},
+ year = {2003},
+ }
+
+@inproceedings{Li07,
+ author = {Li, Huajing and Lee, Wang-Chien and Sivasubramaniam, Anand and Giles, C. Lee},
+ title = {A hybrid cache and prefetch mechanism for scientific literature search engines},
+ booktitle = {Proc. 7th Int'l Conf. Web Engineering},
+ pages = {121--136},
+ year = {2007},
+}
+
+@inproceedings{Long05,
+ author = {Long, Xiaohui and Suel, Torsten},
+ title = {Three-level caching for efficient query processing in large web search engines},
+ booktitle = {Proc. 14th Int'l Conf. World Wide Web},
+ pages = {257--266},
+ year = {2005},
+}
+
+@inproceedings{Marin10,
+ author = {Marin, Mauricio and Gil-Costa, Veronica and Gomez-Pantoja, Carlos},
+ title = {New caching techniques for web search engines},
+ booktitle = {Proc. 19th ACM Int'l Symp. High Performance Distributed Computing},
+ pages = {215--226},
+ year = {2010},
+}
+
+@article{Markatos00,
+ author = {Markatos, Evangelos P.},
+ title = {On caching search engine query results},
+ journal = {Computer Comm.},
+ volume = {24},
+ number = {2},
+ pages = {137--143},
+ year = {2001},
+ }
+
+@article{Ozcan11,
+ author = {Ozcan, Rifat and Alting{\"o}vde, Ismail Seng{\"o}r  and Ulusoy, \"{O}zg\"{u}r},
+ title = {Cost-aware strategies for query result caching in Web search engines},
+ journal = {ACM Trans. Web},
+ volume = {5},
+ number = {2},
+ pages = {9:1--9:25},
+ year = {2011},
+}
+
+@article{Ozcan12,
+ author = {Rifat Ozcan and I. Sengor Altingovde and B. Barla Cambazoglu and Flavio P. Junqueira and \"{O}zg\"{u}r Ulusoy},
+ title = {A five-level static cache architecture for web search engines},
+ journal = {Information Processing \& Management},
+ volume = {48},
+ number = {5},
+ pages = {828-840},
+ year = {2012},
+ }
+
+@article{Puppin10,
+ author = {Puppin, Diego and Silvestri, Fabrizio and Perego, Raffaele and Baeza-Yates, Ricardo},
+ title = {Tuning the capacity of search engines: load-driven routing and incremental caching to reduce and balance the load},
+ journal = {ACM Transactions on Information Systems},
+ volume = {28},
+ number = {2},
+ pages = {1--36},
+ year = {2010},
+ }
+
+@inproceedings{Saraiva01,
+ author = {Saraiva, Paricia Correia and Silva de Moura, Edleno and Ziviani, Novio and Meira, Wagner and Fonseca, Rodrigo and Riberio-Neto, Berthier},
+ title = {Rank-preserving two-level caching for scalable search engines},
+ booktitle = {Proc. 24th Annual Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ pages = {51--58},
+ year = {2001},
+ }
+
+% locality of queries
+@conference{Xie02,
+  author = {Xie, Y. and O'Hallaron, D.},
+  title = {Locality in search engine queries and its implications for caching},
+  booktitle = {Proc. 21st Annual Joint Conf. IEEE Computer and Communications Societies},
+  volume = {3},
+  pages = {1238--1247},
+  year = {2002},
+}
+
+@inproceedings{Zhang08,
+ author = {Zhang, Jiangong and Long, Xiaohui and Suel, Torsten},
+ title = {Performance of compressed inverted list caching in search engines},
+ booktitle = {Proc. 17th Int'l Conf. World Wide Web},
+ pages = {387--396},
+ year = {2008},
+}
+
+@article{Friedman:2002:SGB:635939.635941,
+ author = {Friedman, Jerome H.},
+ title = {Stochastic gradient boosting},
+ journal = {Comput. Stat. Data Anal.},
+ volume = {38},
+ issue = {4},
+ month = {February},
+ year = {2002},
+ issn = {0167-9473},
+ pages = {367--378},
+ numpages = {12},
+ url = {http://dl.acm.org/citation.cfm?id=635939.635941},
+ doi = {10.1016/S0167-9473(01)00065-2},
+ acmid = {635941},
+ publisher = {Elsevier Science Publishers B. V.},
+ address = {Amsterdam, The Netherlands, The Netherlands},
+}
+
+@article{Ozcan2011Jasist,
+ author = {Ozcan, Rifat and Altingovde, Ismail Sengor and Ulusoy, Ozg\&\#x00fc;r},
+ title = {Exploiting navigational queries for result presentation and caching in Web search engines},
+ journal = {J. Am. Soc. Inf. Sci. Technol.},
+ volume = {62},
+ number = {4},
+ year = {2011},
+ pages = {714--726},
+} 
+
+@article{Silverstein1999,
+ author = {Silverstein, Craig and Marais, Hannes and Henzinger, Monika and Moricz, Michael},
+ title = {Analysis of a very large web search engine query log},
+ journal = {SIGIR Forum},
+ volume = {33},
+ number = {1},
+ year = {1999},
+ pages = {6--12},
+} 
+
+@inproceedings{Arroyuelo2012,
+ author = {Arroyuelo, Diego and Gonz\'{a}lez, Sen{\'e}n and Marin, Mauricio and Oyarz\'{u}n, Mauricio and Suel, Torsten},
+ title = {To index or not to index: time-space trade-offs in search engines with positional ranking functions},
+ booktitle = {Proceedings of the 35th international ACM SIGIR conference on Research and development in information retrieval},
+ year = {2012},
+ pages = {255--264},
+} 
+
+@article{Elias75,
+  author        = {P. Elias},
+  title         = {Universal codeword sets and the representation of the integers},
+  journal       = {IEEE Transactions on Information Theory},
+  volume        = 21,
+  number        = "",
+  year          = {1975},
+  pages         = "194--203"
+}
+
+@inproceedings{Jonassen12,
+ author = {Jonassen, Simon and Cambazoglu, Berkant Barla and Silvestri, Fabrizio},
+ title = {Prefetching query results and its impact on search engines},
+ booktitle = {Proc. 35th Int'l ACM SIGIR Conf. Research and Development in Information Retrieval},
+ year = {2012},
+ pages = {in press},
+}
+
+@INPROCEEDINGS{alici12ecir,
+  author = {S.~Alici and I.~S.~Altingovde and R.~Ozcan and B.~B.~Cambazoglu and O.~Ulusoy},
+  title = {Adaptive time-to-live strategies for query result caching in web search engines},
+  booktitle = {Proceedings of 34th European Conference Advances in Information Retrieval},
+  year = {2012},
+  pages = {401--412}
+}
+
+@article{LempelTOIT2004,
+  author        = {R. Lempel and S. Moran},
+  title         = {Optimizing result prefetching in web search engines with segmented indices},
+  journal       = {ACM Transactions on Internet Technology},
+  volume        = 4,
+  number        = "1",
+  year          = {2004},
+  pages         = "31--59"
+}
+
+@ARTICLE{Baeza-Yates08,
+  author = {R.~Baeza-Yates and A.~Gionis and F.~Junqueira and V.~Murdock and V.~Plachouras and F.~Silvestri},
+  title = {Design trade-offs for search engine caching},
+  journal = {ACM Transactions on the Web},
+  year = {2008},
+  volume = {2},
+  pages = {1--28},
+  number = {4}
+}
+
+@INPROCEEDINGS{blanco10aCaching,
+  author = {R.~Blanco and E.~Bortnikov and F.~Junqueira and R.~Lempel and L.~Telloli and H.~Zaragoza},
+  title = {Caching search engine results over incremental indices},
+  booktitle = {Proceedings of the 19th International Conference on World Wide Web},
+  year = {2010},
+  pages = {1065--1066}
+}
+
+@INPROCEEDINGS{blanco10bCaching,
+  author = {R.~Blanco and E.~Bortnikov and F.~Junqueira and R.~Lempel and L.~Telloli and H.~Zaragoza},
+  title = {Caching search engine results over incremental indices},
+  booktitle = {Proceedings of the 33rd Annual International ACM SIGIR Conference on Research and Development in Information Retrieval},
+  year = {2010},
+  pages = {82--89}
+}
+
+@INPROCEEDINGS{cambazoglu10Refreshing,
+  author = {B.~B.~Cambazoglu and F.~Junqueira and V.~Plachouras and S.~Banachowski and B.~Cui and S.~Lim and B.~Bridge},
+  title = {A refreshing perspective of search engine caching},
+  booktitle = {Proceedings of the 19th International Conference on World Wide Web},
+  year = {2010},
+  pages = {181--190}
+}
+
+@ARTICLE{podlipnig03Survey,
+  author = {S.~Podlipnig and L.~Boszormenyi},
+  title = {A survey of Web cache replacement strategies},
+  journal = {ACM Computing Surveys},
+  year = {2003},
+  volume = {35},
+  pages = {374--398},
+  number = {4}
+}
+
+@inproceedings{bortnikov11,
+ author = {Bortnikov, Edward and Lempel, Ronny and Vornovitsky, Kolman},
+ title = {Caching for realtime search},
+ booktitle = {Proceedings of the 33rd European Conference on Advances in Information Retrieval},
+ year = {2011},
+ pages = {104--116},
+} 
+
+@INPROCEEDINGS{alici11sigir,
+  author = {S.~Alici and I.~S.~Altingovde and R.~Ozcan and B.~B.~Cambazoglu and O.~Ulusoy},
+  title = {Timestamp-based result cache invalidation for web search engines},
+  booktitle = {Proceedings of 34th Annual International ACM SIGIR Conference on Research and Development in Information Retrieval},
+  year = {2011},
+  pages = {973--982}
+}
+
+%%%%%%%%%%%%%%% BARLA %%%%%%%%%%%%%%%%%%%%%%
+
+@inproceedings{Pass06,
+ author = {Pass, Greg and Chowdhury, Abdur and Torgeson, Cayley},
+ title = {A picture of search},
+ booktitle = {Proceedings of the 1st International Conference on Scalable Information Systems},
+ articleno = {1},
+ year = {2006},
+}
+
+@inproceedings{Alici11,
+ author = {Alici, Sadiye and Altingovde, Ismail Sengor and Ozcan, Rifat and Cambazoglu, Berkant Barla and Ulusoy, \"{O}zg\"{u}r},
+ title = {Timestamp-based result cache invalidation for web search engines},
+ booktitle = {Proceedings of the 34th International ACM SIGIR Conference on Research and Development in Information Retrieval},
+ pages = {973--982},
+ year = {2011},
+}
+
+@inproceedings{Altingovde11,
+ author = {Altingovde, I. Sengor and Ozcan, Rifat and Cambazoglu, B. Barla and Ulusoy, \"{O}zg\"{u}r},
+ title = {Second chance: a hybrid approach for dynamic result caching in search engines},
+ booktitle = {Proceedings of the 33rd European Conference on Advances in Information Retrieval},
+ pages = {510--516},
+ year = {2011},
+}
+
+@incollection{Baeza-Yates03,
+ author = {Baeza-Yates, Ricardo and Saint-Jean, Felipe},
+ title = {A three level search engine index based in query log distribution},
+ booktitle = {String Processing and Information Retrieval},
+ series = {Lecture Notes in Computer Science},
+ editor = {Nascimento, Mario A. and de Moura, Edleno S. and Oliveira, Arlindo L.},
+ publisher = {Springer Berlin / Heidelberg},
+ volume = {2857},
+ pages = {56--65},
+ year = {2003},
+ }
+
+@incollection{Baeza-Yates07,
+ author = {Baeza-Yates, Ricardo and Junqueira, Flavio and Plachouras, Vassilis and Witschel, Hans},
+ title = {Admission policies for caches of search engine results},
+ booktitle = {String Processing and Information Retrieval},
+ series = {Lecture Notes in Computer Science},
+ editor = {Ziviani, Nivio and Baeza-Yates, Ricardo},
+ publisher = {Springer Berlin / Heidelberg},
+ volume = {4726},
+ pages = {74--85},
+ year = {2007},
+ }
+
+@inproceedings{Baeza-Yates07-2,
+ author = {Baeza-Yates, Ricardo and Gionis, Aristides and Junqueira, Flavio and Murdock, Vanessa and Plachouras, Vassilis and Silvestri, Fabrizio},
+ title = {The impact of caching on search engines},
+ booktitle = {Proceedings of the 30th Annual International ACM SIGIR Conference on Research and Development in Information Retrieval},
+ pages = {183--190},
+ year = {2007},
+ }
+
+@inproceedings{Blanco10,
+ author = {Blanco, Roi and Bortnikov, Edward and Junqueira, Flavio and Lempel, Ronny and Telloli, Luca and Zaragoza, Hugo},
+ title = {Caching search engine results over incremental indices},
+ booktitle = {Proceedings of the 33rd International ACM SIGIR Conference on Research and Development in Information Retrieval},
+ pages = {82--89},
+ year = {2010},
+ }
+
+@inproceedings{Cambazoglu10,
+ author = {Cambazoglu, Berkant Barla and Junqueira, Flavio P. and Plachouras, Vassilis and Banachowski, Scott and Cui, Baoqiu and Lim,
+Swee and Bridge, Bill},
+ title = {A refreshing perspective of search engine caching},
+ booktitle = {Proceedings of the 19th International Conference on World Wide Web},
+ pages = {181--190},
+ year = {2010},
+ }
+
+@incollection{Cambazoglu11,
+ author = {Cambazoglu, Berkant Barla and Baeza-Yates, Ricardo},
+ title = {Scalability challenges in web search engines},
+ booktitle = {Advanced Topics in Information Retrieval},
+ series = {The Information Retrieval Series},
+ editor = {Melucci, Massimo and Baeza-Yates, Ricardo and Croft, W. Bruce},
+ publisher = {Springer Berlin Heidelberg},
+ volume = {33},
+ pages = {27-50},
+ year = {2011},
+ }
+
+@inproceedings{Chowdhury03,
+ author = {Chowdhury, Abdur and Pass, Greg},
+ title = {Operational requirements for scalable search systems},
+ booktitle = {Proceedings of the 12th International Conference on Information and Knowledge Management},
+ pages = {435--442},
+ year = {2003},
+ } 
+
+@article{Fagni06,
+ author = {Fagni, Tiziano and Perego, Raffaele and Silvestri, Fabrizio and Orlando, Salvatore},
+ title = {Boosting the performance of web search engines: Caching and prefetching query results by exploiting historical usage data},
+ journal = {ACM Transactions on Information Systems},
+ volume = {24},
+ number = {1},
+ pages = {51--78},
+ year = {2006},
+ }
+
+@inproceedings{Gan09,
+ author = {Gan, Qingqing and Suel, Torsten},
+ title = {Improved techniques for result caching in web search engines},
+ booktitle = {Proceedings of the 18th International Conference on World Wide Web},
+ pages = {431--440},
+ year = {2009},
+ }
+
+@inproceedings{Lempel03,
+ author = {Lempel, Ronny and Moran, Shlomo},
+ title = {Predictive caching and prefetching of query results in search engines},
+ booktitle = {Proceedings of the 12th International Conference on World Wide Web},
+ pages = {19--28},
+ year = {2003},
+ }
+
+@inproceedings{Li07,
+ author = {Li, Huajing and Lee, Wang-Chien and Sivasubramaniam, Anand and Giles, C. Lee},
+ title = {A hybrid cache and prefetch mechanism for scientific literature search engines},
+ booktitle = {Proceedings of the 7th International Conference on Web Engineering},
+ pages = {121--136},
+ year = {2007},
+}
+
+@inproceedings{Long05,
+ author = {Long, Xiaohui and Suel, Torsten},
+ title = {Three-level caching for efficient query processing in large web search engines},
+ booktitle = {Proceedings of the 14th International Conference on World Wide Web},
+ pages = {257--266},
+ year = {2005},
+ }
+
+@inproceedings{Marin10,
+ author = {Marin, Mauricio and Gil-Costa, Veronica and Gomez-Pantoja, Carlos},
+ title = {New caching techniques for web search engines},
+ booktitle = {Proceedings of the 19th ACM International Symposium on High Performance Distributed Computing},
+ pages = {215--226},
+ year = {2010},
+}
+
+@article{Markatos01,
+ author = {Markatos, Evangelos P.},
+ title = {On caching search engine query results},
+ journal = {Computer Communications},
+ volume = {24},
+ number = {2},
+ pages = {137--143},
+ year = {2001},
+}
+
+@article{Ozcan11,
+ author = {Ozcan, Rifat and Alting{\"o}vde, Ismail Seng{\"o}r  and Ulusoy, \"{O}zg\"{u}r},
+ title = {Cost-aware strategies for query result caching in Web search engines},
+ journal = {ACM Transactions on the Web},
+ volume = {5},
+ number = {2},
+ pages = {9:1--9:25},
+ year = {2011},
+}
+
+@article{OzcanIPM11,
+ author = {Ozcan, Rifat and Alting{\"o}vde, Ismail Seng{\"o}r  and Ulusoy, \"{O}zg\"{u}r},
+ title = {Five-level static cache architecture for Web search engines, },
+ journal = {Information Processing \& Management},
+ volume = {48},
+ number = {5},
+ pages = {828-840},
+ year = {2012},
+}
+
+@article{Ozcan12,
+ author = {Rifat Ozcan and I. Sengor Altingovde and B. Barla Cambazoglu and Flavio P. Junqueira and \"{O}zg\"{u}r Ulusoy},
+ title = {A five-level static cache architecture for web search engines},
+ journal = {Information Processing \& Management},
+ volume = {},
+ number = {},
+ pages = {-},
+ year = {in press},
+ }
+
+@article{Puppin10,
+ author = {Puppin, Diego and Silvestri, Fabrizio and Perego, Raffaele and Baeza-Yates, Ricardo},
+ title = {Tuning the capacity of search engines: load-driven routing and incremental caching to reduce and balance the load},
+ journal = {ACM Transactions on Information Systems},
+ volume = {28},
+ number = {2},
+ pages = {1--36},
+ year = {2010},
+ }
+
+@inproceedings{Saraiva01,
+ author = {Saraiva, Paricia Correia and Silva de Moura, Edleno and Ziviani, Novio and Meira, Wagner and Fonseca, Rodrigo and Riberio-Neto, Berthier},
+ title = {Rank-preserving two-level caching for scalable search engines},
+ booktitle = {Proceedings of the 24th Annual International ACM SIGIR Conference on Research and Development in Information Retrieval},
+ pages = {51--58},
+ year = {2001},
+ }
+
+% locality of queries
+@conference{Xie02,
+  author = {Xie, Y. and O'Hallaron, D.},
+  title = {Locality in search engine queries and its implications for caching},
+  booktitle = {Proceedings of the 21st Annual Joint Conference on IEEE Computer and Communications Societies},
+  volume = {3},
+  pages = {1238--1247},
+  year = {2002},
+}
+
+@inproceedings{Zhang08,
+ author = {Zhang, Jiangong and Long, Xiaohui and Suel, Torsten},
+ title = {Performance of compressed inverted list caching in search engines},
+ booktitle = {Proceedings of the 17th International Conference on World Wide Web},
+ pages = {387--396},
+ year = {2008},
+} 
+
+@inproceedings{Ceccarelli11,
+ author = {Ceccarelli, Diego and Lucchese, Claudio and Orlando, Salvatore and Perego, Raffaele and Silvestri, Fabrizio},
+ title = {Caching query-biased snippets for efficient retrieval},
+ booktitle = {Proceedings of the 14th International Conference on Extending Database Technology},
+ series = {EDBT/ICDT '11},
+ year = {2011},
+ isbn = {978-1-4503-0528-0},
+ location = {Uppsala, Sweden},
+ pages = {93--104},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/1951365.1951379},
+ doi = {10.1145/1951365.1951379},
+ acmid = {1951379},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {caching, efficiency, snippet generation, throughput, web search engines},
+} 
+
+@inproceedings{Turpin07,
+ author = {Turpin, Andrew and Tsegay, Yohannes and Hawking, David and Williams, Hugh E.},
+ title = {Fast generation of result snippets in web search},
+ booktitle = {Proceedings of the 30th annual international ACM SIGIR conference on Research and development in information retrieval},
+ series = {SIGIR '07},
+ year = {2007},
+ isbn = {978-1-59593-597-7},
+ location = {Amsterdam, The Netherlands},
+ pages = {127--134},
+ numpages = {8},
+ url = {http://doi.acm.org/10.1145/1277741.1277766},
+ doi = {10.1145/1277741.1277766},
+ acmid = {1277766},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {document caching, snippet generation, web summaries},
+} 
+
+@inproceedings{Tsegay09,
+ author = {Tsegay, Yohannes and Puglisi, Simon J. and Turpin, Andrew and Zobel, Justin},
+ title = {Document Compaction for Efficient Query Biased Snippet Generation},
+ booktitle = {Proceedings of the 31th European Conference on IR Research on Advances in Information Retrieval},
+ series = {ECIR '09},
+ year = {2009},
+ isbn = {978-3-642-00957-0},
+ location = {Toulouse, France},
+ pages = {509--520},
+ numpages = {12},
+ url = {http://dx.doi.org/10.1007/978-3-642-00958-7_45},
+ doi = {10.1007/978-3-642-00958-7_45},
+ acmid = {1533778},
+ publisher = {Springer-Verlag},
+ address = {Berlin, Heidelberg},
+} 
+
+@inproceedings{Baeza-Yates12,
+ author = {Baeza-Yates, Ricardo and Jonassen, Simon},
+ title = {Modeling static caching in web search engines},
+ booktitle = {Proceedings of the 34th European conference on Advances in Information Retrieval},
+ series = {ECIR'12},
+ year = {2012},
+ isbn = {978-3-642-28996-5},
+ location = {Barcelona, Spain},
+ pages = {436--446},
+ numpages = {11},
+ url = {http://dx.doi.org/10.1007/978-3-642-28997-2_37},
+ doi = {10.1007/978-3-642-28997-2_37},
+ acmid = {2260688},
+ publisher = {Springer-Verlag},
+ address = {Berlin, Heidelberg},
+} 
+
+@inproceedings{Broder07,
+ author = {Broder, Andrei Z. and Fontoura, Marcus and Gabrilovich, Evgeniy and Joshi, Amruta and Josifovski, Vanja and Zhang, Tong},
+ title = {Robust classification of rare queries using web knowledge},
+ booktitle = {Proceedings of the 30th annual international ACM SIGIR conference on Research and development in information retrieval},
+ series = {SIGIR '07},
+ year = {2007},
+ isbn = {978-1-59593-597-7},
+ location = {Amsterdam, The Netherlands},
+ pages = {231--238},
+ numpages = {8},
+ url = {http://doi.acm.org/10.1145/1277741.1277783},
+ doi = {10.1145/1277741.1277783},
+ acmid = {1277783},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {blind relevance feedback, query classification, web search},
+} 
+
+@article{Bailey10,
+ author = {Bailey, Peter and White, Ryen W. and Liu, Han and Kumaran, Giridhar},
+ title = {Mining Historic Query Trails to Label Long and Rare Search Engine Queries},
+ journal = {ACM Trans. Web},
+ issue_date = {September 2010},
+ volume = {4},
+ number = {4},
+ month = sep,
+ year = {2010},
+ issn = {1559-1131},
+ pages = {15:1--15:27},
+ articleno = {15},
+ numpages = {27},
+ url = {http://doi.acm.org/10.1145/1841909.1841912},
+ doi = {10.1145/1841909.1841912},
+ acmid = {1841912},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Long queries, query labeling},
+}

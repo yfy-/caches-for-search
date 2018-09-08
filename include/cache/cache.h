@@ -11,13 +11,13 @@
 class Cache {
 
  public:
-
   explicit Cache(std::uint32_t s) : size_{s}, count_{0}, freq_hist_{nullptr} {}
   inline std::uint32_t Size() const { return size_; }
   inline std::uint32_t Count() const { return count_; }
   inline FrequencyHistogram* GetFreqHist_() const {
     return freq_hist_;
   }
+  inline void SetFrequencyHistogram(FrequencyHistogram* fh) { freq_hist_ = fh; }
   virtual bool IsExist(const std::string&) = 0;
   virtual std::string ToString() const = 0;
 

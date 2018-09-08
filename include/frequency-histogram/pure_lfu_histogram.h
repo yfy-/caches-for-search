@@ -11,10 +11,10 @@ class PureLfuHistogram : public FrequencyHistogram {
   std::unordered_map<std::string, std::uint32_t> histogram;
 
  public:
+  virtual ~PureLfuHistogram();
   std::uint32_t Add(const std::string &) override;
   std::uint32_t Estimate(const std::string &) const override;
   std::string ToString() const override;
 };
-
 
 #endif  // CENG778_PROJECT_FREQUENCY_HISTOGRAM_INCLUDE_PURE_LFU_H

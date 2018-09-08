@@ -37,4 +37,3 @@ std::uint32_t unique_size(const std::vector<std::string> &vector) {
 }
 
 }  // namespace utl
-
