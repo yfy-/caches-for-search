@@ -47,7 +47,7 @@ Example
 ========
 Below is an example to compare the hit-rate of 3 different policies:
 
-.. code-block:: c++
+.. code-block:: cpp
 
   std::vector<std::string> queries{"a", "b", "c", "c", "a", "a", "c", "d", "a",
                                    "b", "b", "d", "a", "a", "b", "a", "a", "c"};
