@@ -1,70 +1,66 @@
 // Copyright 2017 folly
 
-#include <cstdio>
-#include <cmath>
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <string>
-#include <thread>
-#include "policy/replacement/only_eviction_replacement_policy.h"
-#include "policy/eviction/lru_eviction.h"
+#include "frequency-histogram/pure_lfu_histogram.h"
+#include "frequency-histogram/tiny_lfu_histogram.h"
+#include "hitrate_evaluation.h"
+#include "policy/admission/frequency_admission.h"
+#include "policy/eviction/gdsfk.h"
+#include "policy/eviction/inmemory_gdsfk.h"
 #include "policy/eviction/inmemory_lfu_eviction.h"
 #include "policy/eviction/lfu_eviction.h"
-#include "frequency-histogram/pure_lfu_histogram.h"
-#include "policy/admission/frequency_admission.h"
-#include "policy/replacement/admission_replacement_policy.h"
+#include "policy/eviction/lru_eviction.h"
 #include "policy/replacement/admission_controlled_replacement_policy.h"
+#include "policy/replacement/admission_replacement_policy.h"
+#include "policy/replacement/only_eviction_replacement_policy.h"
 #include "policy/replacement/static_dynamic_replacement_policy.h"
-#include "hitrate_evaluation.h"
-#include "frequency-histogram/tiny_lfu_histogram.h"
-#include "policy/eviction/inmemory_gdsfk.h"
-#include "policy/eviction/gdsfk.h"
+#include <cmath>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <thread>
+#include <vector>
 
-
-void GdsfkEval(const std::vector<std::string>& train,
-               const std::vector<std::string>& test, std::uint32_t warmup,
-               HitrateEvaluation* const eval, std::uint32_t base_cache_size,
-                 std::uint32_t until_multip, std::uint8_t k);
-
-void InmemGdsfkEval(const std::vector<std::string>& test, std::uint32_t warmup,
-               HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+void GdsfkEval(const std::vector<std::string> &train,
+               const std::vector<std::string> &test, std::uint32_t warmup,
+               HitrateEvaluation *const eval, std::uint32_t base_cache_size,
                std::uint32_t until_multip, std::uint8_t k);
 
-void AcEval(std::uint32_t, const std::vector<std::string>&,
-            const std::vector<std::string>&, std::uint32_t, std::uint32_t,
+void InmemGdsfkEval(const std::vector<std::string> &test, std::uint32_t warmup,
+                    HitrateEvaluation *const eval,
+                    std::uint32_t base_cache_size, std::uint32_t until_multip,
+                    std::uint8_t k);
+
+void AcEval(std::uint32_t, const std::vector<std::string> &,
+            const std::vector<std::string> &, std::uint32_t, std::uint32_t,
             std::uint32_t);
 
-void FullHistEvEval(const std::vector<std::string>&,
-                    const std::vector<std::string>&, std::uint32_t,
-                    HitrateEvaluation* const, std::uint32_t, std::uint32_t);
+void FullHistEvEval(const std::vector<std::string> &,
+                    const std::vector<std::string> &, std::uint32_t,
+                    HitrateEvaluation *const, std::uint32_t, std::uint32_t);
 
-void FullHistAdmEval(const std::vector<std::string>&,
-                     const std::vector<std::string>&, std::uint32_t,
-                     HitrateEvaluation* const, std::uint32_t, std::uint32_t);
+void FullHistAdmEval(const std::vector<std::string> &,
+                     const std::vector<std::string> &, std::uint32_t,
+                     HitrateEvaluation *const, std::uint32_t, std::uint32_t);
 
-void InMemLfuEval(const std::vector<std::string>&, std::uint32_t,
-                  HitrateEvaluation* const, std::uint32_t, std::uint32_t);
+void InMemLfuEval(const std::vector<std::string> &, std::uint32_t,
+                  HitrateEvaluation *const, std::uint32_t, std::uint32_t);
 
-void LruEval(const std::vector<std::string>&, std::uint32_t,
-             HitrateEvaluation* const, std::uint32_t, std::uint32_t);
+void LruEval(const std::vector<std::string> &, std::uint32_t,
+             HitrateEvaluation *const, std::uint32_t, std::uint32_t);
 
-void SdcEval(std::uint32_t,
-             const std::vector<std::string>&,
-             const std::vector<std::string>&,
-             HitrateEvaluation* const,
-             std::uint32_t,
-             std::uint32_t,
-             std::uint32_t);
+void SdcEval(std::uint32_t, const std::vector<std::string> &,
+             const std::vector<std::string> &, HitrateEvaluation *const,
+             std::uint32_t, std::uint32_t, std::uint32_t);
 
-void WindowHistEvEval(const std::vector<std::string>&,
-                      const std::vector<std::string>&,
-                      std::uint32_t, HitrateEvaluation* const,
-                      std::uint32_t, std::uint32_t, std::uint32_t);
+void WindowHistEvEval(const std::vector<std::string> &,
+                      const std::vector<std::string> &, std::uint32_t,
+                      HitrateEvaluation *const, std::uint32_t, std::uint32_t,
+                      std::uint32_t);
 
-int main(int argc, char* argv[]) {
-  std::vector<std::string> queries {"a", "b", "c", "c", "a", "a", "c", "d", "a",
-        "b", "b", "d", "a", "a", "b", "a", "a", "c"};
+int main(int argc, char *argv[]) {
+  std::vector<std::string> queries{"a", "b", "c", "c", "a", "a", "c", "d", "a",
+                                   "b", "b", "d", "a", "a", "b", "a", "a", "c"};
   // std::ifstream qtrain_file("../resource/aol_big_train_sorted.txt");
 
   // if (qtrain_file.is_open()) {
@@ -103,26 +99,36 @@ int main(int argc, char* argv[]) {
 
   // std::vector<std::string> training_q(queries.begin(),
   //                                     queries.begin() + train_size);
-  // std::vector<std::string> test_q(queries.begin() + train_size, queries.end());
+  // std::vector<std::string> test_q(queries.begin() + train_size,
+  // queries.end());
 
-  auto lru = new LruEviction(3);
-  auto ev = new OnlyEvictionReplacementPolicy(lru, "lru");
+  auto cache_size = 3;
+  LruEviction lru(cache_size);
+  OnlyEvictionReplacementPolicy lru_pol(&lru, "lru");
 
-  for (auto q : queries) {
-    std::cout << "Incoming " << q << std::endl;
-    bool res = ev->IsExist(q);
-    std::cout << lru->CacheToString() << std::endl << std::endl;
-  }
+  InMemoryLfuEviction inmem_lfu(cache_size);
+  OnlyEvictionReplacementPolicy inmem_lfu_pol(&inmem_lfu, "inmem_lfu");
 
-  delete ev;
-  delete lru;
+  // LFU policy with 1000 maximum frequency with the Tiny-LFU
+  // frequency histogram.
+  LfuEviction lfu(cache_size, 1000);
+  TinyLfuHistogram<20, 2> tiny_fh(2, 5);
+  lfu.SetFrequencyHistogram(&tiny_fh);
+  OnlyEvictionReplacementPolicy lfu_pol(&lfu, "lfu");
 
+  HitrateEvaluation eval("Cache Size", ",");
+  // Evaluate policies with the cache_size and 0 warmup
+  eval.Evaluate(queries, {&lru_pol, &inmem_lfu_pol, &lfu_pol}, cache_size, 0);
+  std::cout << "LRU hit rate=" << eval.GetHitrate(cache_size, "lru") << "\n";
+  std::cout << "In-memory LFU hit rate="
+            << eval.GetHitrate(cache_size, "inmem_lfu") << "\n";
+  std::cout << "LFU hit rate=" << eval.GetHitrate(cache_size, "lfu") << "\n";
   return 0;
 }
 
-void FullHistEvEval(const std::vector<std::string>& train,
-                    const std::vector<std::string>& test,
-                    std::uint32_t warmup, HitrateEvaluation* const eval,
+void FullHistEvEval(const std::vector<std::string> &train,
+                    const std::vector<std::string> &test, std::uint32_t warmup,
+                    HitrateEvaluation *const eval,
                     std::uint32_t base_cache_size, std::uint32_t until_multip) {
 
   std::string name = "pure_lfu_long";
@@ -138,9 +144,9 @@ void FullHistEvEval(const std::vector<std::string>& train,
     auto ev_pol2 = new LfuEviction(cache_size, test.size());
     ev_pol2->SetFrequencyHistogram(freq_hist_ev);
     auto lfu_ev = new OnlyEvictionReplacementPolicy(ev_pol2, name);
-    std::vector<ReplacementPolicy*> r {lfu_ev};
-    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
-        "\n";
+    std::vector<ReplacementPolicy *> r{lfu_ev};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size)
+              << "\n";
     eval->Evaluate(test, r, cache_size, warmup);
 
     delete freq_hist_ev;
@@ -149,9 +155,9 @@ void FullHistEvEval(const std::vector<std::string>& train,
   }
 }
 
-void FullHistAdmEval(const std::vector<std::string>& train,
-                     const std::vector<std::string>& test,
-                     std::uint32_t warmup, HitrateEvaluation* const eval,
+void FullHistAdmEval(const std::vector<std::string> &train,
+                     const std::vector<std::string> &test, std::uint32_t warmup,
+                     HitrateEvaluation *const eval,
                      std::uint32_t base_cache_size,
                      std::uint32_t until_multip) {
 
@@ -168,9 +174,9 @@ void FullHistAdmEval(const std::vector<std::string>& train,
     auto ev_pol2 = new LfuEviction(cache_size, test.size());
     auto adm_pol = new FrequencyAdmission(freq_hist_ev);
     auto lfu_adm = new AdmissionReplacementPolicy(ev_pol2, adm_pol, name);
-    std::vector<ReplacementPolicy*> r {lfu_adm};
-    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
-        "\n";
+    std::vector<ReplacementPolicy *> r{lfu_adm};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size)
+              << "\n";
     eval->Evaluate(test, r, cache_size, warmup);
 
     delete freq_hist_ev;
@@ -180,8 +186,8 @@ void FullHistAdmEval(const std::vector<std::string>& train,
   }
 }
 
-void InMemLfuEval(const std::vector<std::string>& test, std::uint32_t warmup,
-                  HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+void InMemLfuEval(const std::vector<std::string> &test, std::uint32_t warmup,
+                  HitrateEvaluation *const eval, std::uint32_t base_cache_size,
                   std::uint32_t until_multip) {
 
   std::string name = "inmem_lfu";
@@ -190,9 +196,9 @@ void InMemLfuEval(const std::vector<std::string>& test, std::uint32_t warmup,
     std::uint32_t cache_size = base_cache_size * i;
     auto inmem_ev = new InMemoryLfuEviction(cache_size);
     auto inmem_rep_pol = new OnlyEvictionReplacementPolicy(inmem_ev, name);
-    std::vector<ReplacementPolicy*> r {inmem_rep_pol};
-    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
-        "\n";
+    std::vector<ReplacementPolicy *> r{inmem_rep_pol};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size)
+              << "\n";
     eval->Evaluate(test, r, cache_size, warmup);
 
     delete inmem_ev;
@@ -200,8 +206,8 @@ void InMemLfuEval(const std::vector<std::string>& test, std::uint32_t warmup,
   }
 }
 
-void LruEval(const std::vector<std::string>& test, std::uint32_t warmup,
-             HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+void LruEval(const std::vector<std::string> &test, std::uint32_t warmup,
+             HitrateEvaluation *const eval, std::uint32_t base_cache_size,
              std::uint32_t until_multip) {
 
   std::string name = "lru";
@@ -210,9 +216,9 @@ void LruEval(const std::vector<std::string>& test, std::uint32_t warmup,
     std::uint32_t cache_size = base_cache_size * i;
     auto lru = new LruEviction(cache_size);
     auto lru_rep_pol = new OnlyEvictionReplacementPolicy(lru, name);
-    std::vector<ReplacementPolicy*> r {lru_rep_pol};
-    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
-        "\n";
+    std::vector<ReplacementPolicy *> r{lru_rep_pol};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size)
+              << "\n";
     eval->Evaluate(test, r, cache_size, warmup);
 
     delete lru;
@@ -220,9 +226,10 @@ void LruEval(const std::vector<std::string>& test, std::uint32_t warmup,
   }
 }
 
-void InmemGdsfkEval(const std::vector<std::string>& test, std::uint32_t warmup,
-                    HitrateEvaluation* const eval, std::uint32_t base_cache_size,
-                    std::uint32_t until_multip, std::uint8_t k) {
+void InmemGdsfkEval(const std::vector<std::string> &test, std::uint32_t warmup,
+                    HitrateEvaluation *const eval,
+                    std::uint32_t base_cache_size, std::uint32_t until_multip,
+                    std::uint8_t k) {
 
   std::string name = "inmem_gdsf" + std::to_string(k);
 
@@ -230,9 +237,9 @@ void InmemGdsfkEval(const std::vector<std::string>& test, std::uint32_t warmup,
     std::uint32_t cache_size = base_cache_size * i;
     auto gdsf = new InmemoryGdsfk(cache_size, k);
     auto gdsf_rep_pol = new OnlyEvictionReplacementPolicy(gdsf, name);
-    std::vector<ReplacementPolicy*> r {gdsf_rep_pol};
-    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
-        "\n";
+    std::vector<ReplacementPolicy *> r{gdsf_rep_pol};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size)
+              << "\n";
     eval->Evaluate(test, r, cache_size, warmup);
 
     delete gdsf;
@@ -240,9 +247,9 @@ void InmemGdsfkEval(const std::vector<std::string>& test, std::uint32_t warmup,
   }
 }
 
-void GdsfkEval(const std::vector<std::string>& train,
-               const std::vector<std::string>& test, std::uint32_t warmup,
-               HitrateEvaluation* const eval, std::uint32_t base_cache_size,
+void GdsfkEval(const std::vector<std::string> &train,
+               const std::vector<std::string> &test, std::uint32_t warmup,
+               HitrateEvaluation *const eval, std::uint32_t base_cache_size,
                std::uint32_t until_multip, std::uint8_t k) {
 
   std::string name = "pure_gdsf" + std::to_string(k);
@@ -250,14 +257,14 @@ void GdsfkEval(const std::vector<std::string>& train,
   for (std::uint32_t i = 1; i <= until_multip; ++i) {
     std::uint32_t cache_size = base_cache_size * i;
     auto pure = new PureLfuHistogram();
-    for (auto tq: train)
+    for (auto tq : train)
       pure->Add(tq);
     auto gdsf = new Gdsfk(cache_size, k);
     gdsf->SetFrequencyHistogram(pure);
     auto gdsf_rep_pol = new OnlyEvictionReplacementPolicy(gdsf, name);
-    std::vector<ReplacementPolicy*> r {gdsf_rep_pol};
-    std::cout << name << " evaluating, cache: " << std::to_string(cache_size) <<
-        "\n";
+    std::vector<ReplacementPolicy *> r{gdsf_rep_pol};
+    std::cout << name << " evaluating, cache: " << std::to_string(cache_size)
+              << "\n";
     eval->Evaluate(test, r, cache_size, warmup);
 
     delete pure;
@@ -267,11 +274,9 @@ void GdsfkEval(const std::vector<std::string>& train,
 }
 
 void AcEval(std::uint32_t controlled_prop,
-            const std::vector<std::string>& train,
-            const std::vector<std::string>& test,
-            std::uint32_t base_cache_size,
-            std::uint32_t until_multip,
-            std::uint32_t warmup) {
+            const std::vector<std::string> &train,
+            const std::vector<std::string> &test, std::uint32_t base_cache_size,
+            std::uint32_t until_multip, std::uint32_t warmup) {
 
   auto exp = new HitrateEvaluation("Cache Size", ",");
   std::string prop = std::to_string(controlled_prop);
@@ -283,15 +288,15 @@ void AcEval(std::uint32_t controlled_prop,
 
     for (std::uint32_t j = 1; j <= until_multip; ++j) {
       std::uint32_t cache_size = base_cache_size * j;
-      std::cout << prop << ") Cache size is " << std::to_string(cache_size) <<
-          "\n";
+      std::cout << prop << ") Cache size is " << std::to_string(cache_size)
+                << "\n";
 
       std::uint32_t c_size = cache_size / 10 * controlled_prop;
       std::uint32_t u_size = cache_size - c_size;
-      std::cout << prop << ") Controlled size is " << std::to_string(c_size) <<
-          "\n";
-      std::cout << prop << ") Uncontrolled size is " <<
-          std::to_string(u_size) << "\n";
+      std::cout << prop << ") Controlled size is " << std::to_string(c_size)
+                << "\n";
+      std::cout << prop << ") Uncontrolled size is " << std::to_string(u_size)
+                << "\n";
 
       auto freq_hist_adm = new PureLfuHistogram();
 
@@ -302,12 +307,10 @@ void AcEval(std::uint32_t controlled_prop,
       auto controlled = new LruEviction(c_size);
       auto uncontrolled = new LruEviction(u_size);
       auto adm = new FrequencyAdmission(freq_hist_adm);
-      auto ac = new AdmissionControlledReplacementPolicy(controlled,
-                                                         uncontrolled, adm,
-                                                         i, "ac_" +
-                                                         freq_threshold);
+      auto ac = new AdmissionControlledReplacementPolicy(
+          controlled, uncontrolled, adm, i, "ac_" + freq_threshold);
 
-      std::vector<ReplacementPolicy*> r {ac};
+      std::vector<ReplacementPolicy *> r{ac};
       exp->Evaluate(test, r, cache_size, warmup);
 
       delete controlled;
@@ -324,38 +327,32 @@ void AcEval(std::uint32_t controlled_prop,
   delete exp;
 }
 
-void SdcEval(std::uint32_t static_prop,
-             const std::vector<std::string>& train,
-             const std::vector<std::string>& test,
-             HitrateEvaluation* const eval,
-             std::uint32_t base_cache_size,
-             std::uint32_t until_multip,
-             std::uint32_t warmup) {
+void SdcEval(std::uint32_t static_prop, const std::vector<std::string> &train,
+             const std::vector<std::string> &test,
+             HitrateEvaluation *const eval, std::uint32_t base_cache_size,
+             std::uint32_t until_multip, std::uint32_t warmup) {
   std::string prop = std::to_string(static_prop);
 
   for (std::uint32_t i = 1; i <= until_multip; ++i) {
     std::uint32_t cache_size = base_cache_size * i;
-    std::cout << prop << ") Cache size is " << std::to_string(cache_size) <<
-        "\n";
+    std::cout << prop << ") Cache size is " << std::to_string(cache_size)
+              << "\n";
 
     std::uint32_t st_size = cache_size / 10 * static_prop;
     std::uint32_t dyn_size = cache_size - st_size;
 
-    std::cout << prop << ") Static size is " << std::to_string(st_size) <<
-        "\n";
-    std::cout << prop << ") Dynamic size is " <<
-        std::to_string(dyn_size) << "\n";
-
+    std::cout << prop << ") Static size is " << std::to_string(st_size) << "\n";
+    std::cout << prop << ") Dynamic size is " << std::to_string(dyn_size)
+              << "\n";
 
     auto lfu = new LfuEviction(st_size, train.size());
     auto pure = new PureLfuHistogram();
     auto gdsfk = new Gdsfk(dyn_size, 3);
     gdsfk->SetFrequencyHistogram(pure);
 
-    auto sdc = new StaticDynamicReplacementPolicy(train, gdsfk, lfu, pure,
-                                                 "sdc_" +
-                                                 std::to_string(static_prop));
-    std::vector<ReplacementPolicy*> r {sdc};
+    auto sdc = new StaticDynamicReplacementPolicy(
+        train, gdsfk, lfu, pure, "sdc_" + std::to_string(static_prop));
+    std::vector<ReplacementPolicy *> r{sdc};
     eval->Evaluate(test, r, cache_size, warmup);
 
     delete lfu;
